@@ -43,6 +43,8 @@ func (r *render) addSample(pixels []vec3) {
 	r.samples++
 }
 
+var pixelIntensity = makeInterval(0.000, 0.999)
+
 func (r *render) squash() []vec3 {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -50,7 +52,7 @@ func (r *render) squash() []vec3 {
 	result := make([]vec3, len(r.pixels))
 
 	for i, pixel := range r.pixels {
-		result[i] = pixel.divideScalar(float64(r.samples))
+		result[i] = pixel.divideScalar(float64(r.samples)).clamp(pixelIntensity)
 	}
 
 	return result
@@ -99,31 +101,25 @@ func (c *camera) render(world hittable) *render {
 
 	result := makeRender(c.imageWidth, c.imageHeight)
 
-	pixels := make([]vec3, c.imageWidth*c.imageHeight)
+	for sample := 0; sample < c.samples; sample++ {
 
-	intensity := makeInterval(0.000, 0.999)
+		c.onUpdateProgress(float64(sample) / float64(c.samples))
 
-	for x := 0; x < imageWidth; x++ {
-		c.onUpdateProgress(float64(x) / float64(imageWidth))
+		pixels := make([]vec3, c.imageWidth*c.imageHeight)
 
-		for y := 0; y < c.imageHeight; y++ {
-
-			pixelColor := makeVec3(0, 0, 0)
-
-			for sample := 0; sample < c.samples; sample++ {
+		for x := 0; x < imageWidth; x++ {
+			for y := 0; y < c.imageHeight; y++ {
 				r := c.getRay(x, y)
-				pixelColor.addMut(rayColor(r, world))
+
+				pixelIndex := getPixelIndex(x, y, imageWidth)
+				pixelColor := rayColor(r, world)
+
+				pixels[pixelIndex] = pixelColor
 			}
-
-			pixelColor.divideScalarMut(float64(c.samples))
-			pixelColor.clampMut(intensity)
-
-			pixels[getPixelIndex(x, y, imageWidth)] = pixelColor
-
 		}
-	}
 
-	result.addSample(pixels)
+		result.addSample(pixels)
+	}
 
 	return result
 }
