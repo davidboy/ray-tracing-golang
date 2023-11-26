@@ -14,7 +14,7 @@ func raycastScene(imageWidth int, aspectRatio float64, updateProgress func(perce
 	world.add(makeSphere(makeVec3(0, 0, -1), 0.5))
 	world.add(makeSphere(makeVec3(0, -100.5, -1), 100))
 
-	camera := makeCamera(imageWidth, aspectRatio)
+	camera := makeCamera(imageWidth, aspectRatio, 100)
 	camera.onUpdateProgress = updateProgress // TODO
 
 	return camera.render(world)

@@ -5,6 +5,8 @@ type camera struct {
 	imageHeight int
 	aspectRatio float64
 
+	samples int
+
 	center      vec3 // camera center
 	pixel00Loc  vec3 // location of pixel (0, 0)
 	pixelDeltaU vec3 // offset to pixel to the right
@@ -13,7 +15,7 @@ type camera struct {
 	onUpdateProgress func(progress float64)
 }
 
-func makeCamera(imageWidth int, aspectRatio float64) *camera {
+func makeCamera(imageWidth int, aspectRatio float64, samples int) *camera {
 	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
 
 	center := makeVec3(0, 0, 0)
@@ -40,6 +42,8 @@ func makeCamera(imageWidth int, aspectRatio float64) *camera {
 		imageHeight: imageHeight,
 		aspectRatio: aspectRatio,
 
+		samples: samples,
+
 		center:      center,
 		pixel00Loc:  pixel00Loc,
 		pixelDeltaU: pixelDeltaU,
@@ -53,18 +57,32 @@ func makeCamera(imageWidth int, aspectRatio float64) *camera {
 func (c *camera) render(world hittable) []vec3 {
 	pixels := make([]vec3, c.imageWidth*c.imageHeight)
 
+	intensity := makeInterval(0.000, 0.999)
+
 	for x := 0; x < imageWidth; x++ {
 		c.onUpdateProgress(float64(x) / float64(imageWidth))
 
 		for y := 0; y < c.imageHeight; y++ {
-			pixelCenter := c.pixel00Loc.
-				add(c.pixelDeltaU.multiplyScalar(float64(x))).
-				add(c.pixelDeltaV.multiplyScalar(float64(y)))
 
-			rayDirection := pixelCenter.subtract(c.center)
-			ray := MakeRay(c.center, rayDirection)
+			pixelColor := makeVec3(0, 0, 0)
 
-			pixels[getPixelIndex(x, y, imageWidth)] = rayColor(ray, world)
+			for sample := 0; sample < c.samples; sample++ {
+				r := c.getRay(x, y)
+				pixelColor.addMut(rayColor(r, world))
+			}
+
+			pixelColor.divideScalarMut(float64(c.samples))
+			pixelColor.clampMut(intensity)
+
+			pixels[getPixelIndex(x, y, imageWidth)] = pixelColor
+
+			// pixelCenter := c.pixel00Loc.
+			// 	add(c.pixelDeltaU.multiplyScalar(float64(x))).
+			// 	add(c.pixelDeltaV.multiplyScalar(float64(y)))
+
+			// rayDirection := pixelCenter.subtract(c.center)
+
+			// pixels[getPixelIndex(x, y, imageWidth)] = rayColor(ray, world)
 		}
 	}
 
@@ -74,6 +92,25 @@ func (c *camera) render(world hittable) []vec3 {
 var white = makeVec3(1.0, 1.0, 1.0)
 var blue = makeVec3(0.5, 0.7, 1.0)
 
+func (c *camera) getRay(x, y int) Ray {
+	pixelCenter := c.pixel00Loc.
+		add(c.pixelDeltaU.multiplyScalar(float64(x))).
+		add(c.pixelDeltaV.multiplyScalar(float64(y)))
+
+	pixelSample := pixelCenter.add(c.pixelSampleSquare())
+
+	rayOrigin := c.center
+	rayDirection := pixelSample.subtract(rayOrigin)
+
+	return makeRay(rayOrigin, rayDirection)
+}
+
+func (c *camera) pixelSampleSquare() vec3 {
+	px := -0.5 + rand()
+	py := -0.5 + rand()
+	return c.pixelDeltaU.multiplyScalar(px).add(c.pixelDeltaV.multiplyScalar(py))
+}
+
 func rayColor(r Ray, world hittable) vec3 {
 	var rec hitRecord
 
@@ -81,7 +118,7 @@ func rayColor(r Ray, world hittable) vec3 {
 		return rec.normal.addScalar(1.0).multiplyScalar(0.5)
 	}
 
-	unitDirection := r.Direction.unitVector()
+	unitDirection := r.direction.unitVector()
 	a := 0.5 * (unitDirection.y() + 1.0)
 
 	return white.multiplyScalar(1.0 - a).add(blue.multiplyScalar(a))

@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"math"
+	r "math/rand"
+)
 
 var infinity = math.Inf(1)
 
@@ -20,4 +23,12 @@ func calculateImageHeight(imageWidth int, aspectRatio float64) int {
 
 func getPixelIndex(x, y, imageWidth int) int {
 	return y*imageWidth + x
+}
+
+func rand() float64 {
+	return r.Float64()
+}
+
+func randb(min, max float64) float64 {
+	return min + (max-min)*rand()
 }

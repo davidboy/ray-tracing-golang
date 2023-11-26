@@ -8,7 +8,7 @@ type hitRecord struct {
 }
 
 func (rec *hitRecord) setFaceNormal(r Ray, outwardNormal vec3) {
-	rec.frontFace = dot(r.Direction, outwardNormal) < 0
+	rec.frontFace = dot(r.direction, outwardNormal) < 0
 
 	if rec.frontFace {
 		rec.normal = outwardNormal

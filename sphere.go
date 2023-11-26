@@ -12,10 +12,10 @@ func makeSphere(center vec3, radius float64) sphere {
 }
 
 func (s sphere) hit(r Ray, t interval, rec *hitRecord) bool {
-	oc := r.Origin.subtract(s.center)
+	oc := r.origin.subtract(s.center)
 
-	a := r.Direction.lengthSquared()
-	halfB := dot(oc, r.Direction)
+	a := r.direction.lengthSquared()
+	halfB := dot(oc, r.direction)
 	c := oc.lengthSquared() - s.radius*s.radius
 
 	discriminant := halfB*halfB - a*c
@@ -33,7 +33,7 @@ func (s sphere) hit(r Ray, t interval, rec *hitRecord) bool {
 	}
 
 	rec.t = root
-	rec.p = r.At(rec.t)
+	rec.p = r.at(rec.t)
 
 	outwardNormal := rec.p.subtract(s.center).divideScalar(s.radius)
 	rec.setFaceNormal(r, outwardNormal)
