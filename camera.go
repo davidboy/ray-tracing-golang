@@ -13,22 +13,27 @@ type camera struct {
 	pixel00Loc  vec3 // location of pixel (0, 0)
 	pixelDeltaU vec3 // offset to pixel to the right
 	pixelDeltaV vec3 // offset to pixel below
-
-	onUpdateProgress func(progress float64)
 }
 
 type render struct {
+	c *camera
+	w hittable
+
 	samples int    // number of samples that have been taken
 	pixels  []vec3 // rendered pixels
 
 	finished bool // whether the render has finished
+	dirty    bool // whether the render has changed since the last squash
 
 	mu sync.Mutex
 }
 
-func makeRender(imageWidth, imageHeight int) *render {
+func makeRender(c *camera, w hittable) *render {
 	return &render{
-		pixels: make([]vec3, imageWidth*imageHeight),
+		c: c,
+		w: w,
+
+		pixels: make([]vec3, c.imageWidth*c.imageHeight),
 	}
 }
 
@@ -41,6 +46,7 @@ func (r *render) addSample(pixels []vec3) {
 	}
 
 	r.samples++
+	r.dirty = true
 }
 
 var pixelIntensity = makeInterval(0.000, 0.999)
@@ -54,6 +60,8 @@ func (r *render) squash() []vec3 {
 	for i, pixel := range r.pixels {
 		result[i] = pixel.divideScalar(float64(r.samples)).clamp(pixelIntensity)
 	}
+
+	r.dirty = false
 
 	return result
 }
@@ -91,37 +99,32 @@ func makeCamera(imageWidth int, aspectRatio float64, samples int) *camera {
 		pixel00Loc:  pixel00Loc,
 		pixelDeltaU: pixelDeltaU,
 		pixelDeltaV: pixelDeltaV,
-
-		onUpdateProgress: func(progress float64) {},
 	}
 
 }
 
-func (c *camera) render(world hittable) *render {
+func (r *render) run() {
+	for sample := 0; sample < r.c.samples; sample++ {
 
-	result := makeRender(c.imageWidth, c.imageHeight)
-
-	for sample := 0; sample < c.samples; sample++ {
-
-		c.onUpdateProgress(float64(sample) / float64(c.samples))
-
-		pixels := make([]vec3, c.imageWidth*c.imageHeight)
+		pixels := make([]vec3, r.c.imageWidth*r.c.imageHeight)
 
 		for x := 0; x < imageWidth; x++ {
-			for y := 0; y < c.imageHeight; y++ {
-				r := c.getRay(x, y)
+			for y := 0; y < r.c.imageHeight; y++ {
+				ray := r.c.getRay(x, y)
 
 				pixelIndex := getPixelIndex(x, y, imageWidth)
-				pixelColor := rayColor(r, world)
+				pixelColor := rayColor(ray, r.w)
 
 				pixels[pixelIndex] = pixelColor
 			}
 		}
 
-		result.addSample(pixels)
+		r.addSample(pixels)
 	}
+}
 
-	return result
+func (c *camera) render(world hittable) *render {
+	return makeRender(c, world)
 }
 
 var white = makeVec3(1.0, 1.0, 1.0)

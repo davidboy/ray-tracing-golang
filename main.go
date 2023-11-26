@@ -1,55 +1,54 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func raycastScene(imageWidth int, aspectRatio float64, updateProgress func(percentageComplete float64)) []vec3 {
+func renderScene(imageWidth int, aspectRatio float64) *render {
 
 	world := makeHittableList()
 	world.add(makeSphere(makeVec3(0, 0, -1), 0.5))
 	world.add(makeSphere(makeVec3(0, -100.5, -1), 100))
 
-	camera := makeCamera(imageWidth, aspectRatio, 100)
-	camera.onUpdateProgress = updateProgress // TODO
+	camera := makeCamera(imageWidth, aspectRatio, 1000)
 
 	render := camera.render(world)
+	go render.run()
 
-	return render.squash()
+	return render
 }
 
-const imageWidth = 400
+const imageWidth = 800
 const aspectRatio = 16.0 / 9.0
 
 func ppmMain() {
-	imagePixels := raycastScene(imageWidth, aspectRatio, func(percentageComplete float64) {
-		fmt.Fprintf(os.Stderr, "\rPercentage complete: %.2f", percentageComplete*100)
-	})
+	render := renderScene(imageWidth, aspectRatio)
+
+	// TODO: progress reporting
+
+	// func(percentageComplete float64) {
+	// 	fmt.Fprintf(os.Stderr, "\rPercentage complete: %.2f", percentageComplete*100)
+	// }
+
+	imagePixels := render.squash()
 
 	writePpm(imageWidth, aspectRatio, imagePixels)
-
-	fmt.Fprintf(os.Stderr, "\rDone.                                       \n")
 }
 
 func ebitenMain() {
-	imagePixels := raycastScene(imageWidth, aspectRatio, func(percentageComplete float64) {
-		fmt.Fprintf(os.Stdout, "\rPercentage complete: %.2f", percentageComplete*100)
-	})
+	render := renderScene(imageWidth, aspectRatio)
 
-	fmt.Fprintf(os.Stdout, "\rDone.                                       \n")
+	// TODO: progress reporting
 
-	game := makeGame()
+	game := makeGame(render)
 
-	game.SetPixels(&imagePixels)
-
-	ebiten.SetWindowSize(game.imageWidth, game.imageHeight)
+	ebiten.SetWindowSize(game.render.c.imageWidth, game.render.c.imageHeight)
 	ebiten.SetWindowTitle("Raytracer")
 
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	ebiten.MaximizeWindow()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

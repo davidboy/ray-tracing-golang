@@ -3,49 +3,40 @@ package main
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Game struct {
-	imageWidth, imageHeight int
-
-	image       *ebiten.Image
-	imagePixels []vec3
-	imageDirty  bool
+	render *render
+	image  *ebiten.Image
 }
 
-func makeGame() *Game {
-	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
+func makeGame(r *render) *Game {
+
+	imageWidth := r.c.imageWidth
+	imageHeight := r.c.imageHeight
 
 	return &Game{
-		imageWidth:  imageWidth,
-		imageHeight: imageHeight,
-
-		image:       ebiten.NewImage(imageWidth, imageHeight),
-		imagePixels: make([]vec3, imageWidth*imageHeight),
-		imageDirty:  true,
+		render: r,
+		image:  ebiten.NewImage(imageWidth, imageHeight),
 	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return g.imageWidth, g.imageHeight
+	return g.render.c.imageWidth, g.render.c.imageHeight
 }
 
 func (g *Game) Update() error {
-	if g.imageDirty {
 
-		for x := 0; x < g.imageWidth; x++ {
-			for y := 0; y < g.imageHeight; y++ {
-				index := getPixelIndex(x, y, g.imageWidth)
-				g.image.Set(x, g.imageHeight-y, g.imagePixels[index])
+	if g.render.dirty {
+		pixels := g.render.squash()
+
+		for x := 0; x < g.render.c.imageWidth; x++ {
+			for y := 0; y < g.render.c.imageHeight; y++ {
+				index := getPixelIndex(x, y, g.render.c.imageWidth)
+				g.image.Set(x, g.render.c.imageHeight-y, pixels[index])
 			}
 		}
 
-		g.imageDirty = false
 	}
 
 	return nil
-}
-
-func (g *Game) SetPixels(imagePixels *[]vec3) {
-	g.imagePixels = *imagePixels
-	g.imageDirty = true
 }
 
 func (g *Game) Draw(image *ebiten.Image) {
