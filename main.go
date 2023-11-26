@@ -12,15 +12,16 @@ import (
 
 func hitSphere(center Vec3, radius float64, r Ray) float64 {
 	oc := r.Origin.Subtract(center)
-	a := r.Direction.Dot(r.Direction)
-	b := 2.0 * oc.Dot(r.Direction)
-	c := oc.Dot(oc) - radius*radius
-	discriminant := b*b - 4*a*c
+
+	a := r.Direction.LengthSquared()
+	halfB := oc.Dot(r.Direction)
+	c := oc.LengthSquared() - radius*radius
+	discriminant := halfB*halfB - a*c
 
 	if discriminant < 0 {
 		return -1.0
 	} else {
-		return (-b - math.Sqrt(discriminant)) / (2.0 * a)
+		return (-halfB - math.Sqrt(discriminant)) / a
 	}
 
 }
