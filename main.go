@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func hitSphere(center Vec3, radius float64, r Ray) bool {
@@ -90,6 +93,29 @@ func ppmMain() {
 	fmt.Fprintf(os.Stderr, "\rDone.                                       \n")
 }
 
+func ebitenMain() {
+	imagePixels := raycastScene(imageWidth, aspectRatio, func(percentageComplete float64) {
+		fmt.Fprintf(os.Stdout, "\rPercentage complete: %.2f", percentageComplete*100)
+	})
+
+	fmt.Fprintf(os.Stdout, "\rDone.                                       \n")
+
+	game := &Game{
+		imageWidth:  imageWidth,
+		imageHeight: calculateImageHeight(imageWidth, aspectRatio),
+
+		imagePixels: imagePixels,
+	}
+
+	ebiten.SetWindowSize(game.imageWidth, game.imageHeight)
+	ebiten.SetWindowTitle("Raytracer")
+
+	if err := ebiten.RunGame(game); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
-	ppmMain()
+	// ppmMain()
+	ebitenMain()
 }
