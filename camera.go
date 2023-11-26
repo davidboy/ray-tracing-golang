@@ -5,10 +5,10 @@ type camera struct {
 	imageHeight int
 	aspectRatio float64
 
-	center      Vec3 // camera center
-	pixel00Loc  Vec3 // location of pixel (0, 0)
-	pixelDeltaU Vec3 // offset to pixel to the right
-	pixelDeltaV Vec3 // offset to pixel below
+	center      vec3 // camera center
+	pixel00Loc  vec3 // location of pixel (0, 0)
+	pixelDeltaU vec3 // offset to pixel to the right
+	pixelDeltaV vec3 // offset to pixel below
 
 	onUpdateProgress func(progress float64)
 }
@@ -16,24 +16,24 @@ type camera struct {
 func makeCamera(imageWidth int, aspectRatio float64) *camera {
 	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
 
-	center := MakeVec3(0, 0, 0)
+	center := makeVec3(0, 0, 0)
 
 	focalLength := 1.0
 	viewportHeight := 2.0
 	viewportWidth := viewportHeight * (float64(imageWidth) / float64(imageHeight))
 
-	viewportU := MakeVec3(viewportWidth, 0, 0)
-	viewportV := MakeVec3(0, viewportHeight, 0)
+	viewportU := makeVec3(viewportWidth, 0, 0)
+	viewportV := makeVec3(0, viewportHeight, 0)
 
-	pixelDeltaU := viewportU.DivideScalar(float64(imageWidth))
-	pixelDeltaV := viewportV.DivideScalar(float64(imageHeight))
+	pixelDeltaU := viewportU.divideScalar(float64(imageWidth))
+	pixelDeltaV := viewportV.divideScalar(float64(imageHeight))
 
 	viewportUpperLeft := center.
-		Subtract(MakeVec3(0, 0, focalLength)).
-		Subtract(viewportU.DivideScalar(2)).
-		Subtract(viewportV.DivideScalar(2))
+		subtract(makeVec3(0, 0, focalLength)).
+		subtract(viewportU.divideScalar(2)).
+		subtract(viewportV.divideScalar(2))
 
-	pixel00Loc := viewportUpperLeft.Add(pixelDeltaU.Add(pixelDeltaV).MultiplyScalar(0.5))
+	pixel00Loc := viewportUpperLeft.add(pixelDeltaU.add(pixelDeltaV).multiplyScalar(0.5))
 
 	return &camera{
 		imageWidth:  imageWidth,
@@ -50,18 +50,18 @@ func makeCamera(imageWidth int, aspectRatio float64) *camera {
 
 }
 
-func (c *camera) render(world hittable) []Vec3 {
-	pixels := make([]Vec3, c.imageWidth*c.imageHeight)
+func (c *camera) render(world hittable) []vec3 {
+	pixels := make([]vec3, c.imageWidth*c.imageHeight)
 
 	for x := 0; x < imageWidth; x++ {
 		c.onUpdateProgress(float64(x) / float64(imageWidth))
 
 		for y := 0; y < c.imageHeight; y++ {
 			pixelCenter := c.pixel00Loc.
-				Add(c.pixelDeltaU.MultiplyScalar(float64(x))).
-				Add(c.pixelDeltaV.MultiplyScalar(float64(y)))
+				add(c.pixelDeltaU.multiplyScalar(float64(x))).
+				add(c.pixelDeltaV.multiplyScalar(float64(y)))
 
-			rayDirection := pixelCenter.Subtract(c.center)
+			rayDirection := pixelCenter.subtract(c.center)
 			ray := MakeRay(c.center, rayDirection)
 
 			pixels[getPixelIndex(x, y, imageWidth)] = rayColor(ray, world)
@@ -71,18 +71,18 @@ func (c *camera) render(world hittable) []Vec3 {
 	return pixels
 }
 
-var white = MakeVec3(1.0, 1.0, 1.0)
-var blue = MakeVec3(0.5, 0.7, 1.0)
+var white = makeVec3(1.0, 1.0, 1.0)
+var blue = makeVec3(0.5, 0.7, 1.0)
 
-func rayColor(r Ray, world hittable) Vec3 {
+func rayColor(r Ray, world hittable) vec3 {
 	var rec hitRecord
 
 	if world.hit(r, makeInterval(0.0, infinity), &rec) {
-		return rec.normal.AddScalar(1.0).MultiplyScalar(0.5)
+		return rec.normal.addScalar(1.0).multiplyScalar(0.5)
 	}
 
-	unitDirection := r.Direction.UnitVector()
-	a := 0.5 * (unitDirection.Y() + 1.0)
+	unitDirection := r.Direction.unitVector()
+	a := 0.5 * (unitDirection.y() + 1.0)
 
-	return white.MultiplyScalar(1.0 - a).Add(blue.MultiplyScalar(a))
+	return white.multiplyScalar(1.0 - a).add(blue.multiplyScalar(a))
 }

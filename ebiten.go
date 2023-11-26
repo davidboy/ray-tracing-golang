@@ -6,7 +6,7 @@ type Game struct {
 	imageWidth, imageHeight int
 
 	image       *ebiten.Image
-	imagePixels []Vec3
+	imagePixels []vec3
 	imageDirty  bool
 }
 
@@ -18,7 +18,7 @@ func makeGame() *Game {
 		imageHeight: imageHeight,
 
 		image:       ebiten.NewImage(imageWidth, imageHeight),
-		imagePixels: make([]Vec3, imageWidth*imageHeight),
+		imagePixels: make([]vec3, imageWidth*imageHeight),
 		imageDirty:  true,
 	}
 }
@@ -43,7 +43,7 @@ func (g *Game) Update() error {
 	return nil
 }
 
-func (g *Game) SetPixels(imagePixels *[]Vec3) {
+func (g *Game) SetPixels(imagePixels *[]vec3) {
 	g.imagePixels = *imagePixels
 	g.imageDirty = true
 }
@@ -52,7 +52,7 @@ func (g *Game) Draw(image *ebiten.Image) {
 	image.DrawImage(g.image, nil)
 }
 
-func (v Vec3) RGBA() (r, g, b, a uint32) {
+func (v vec3) RGBA() (r, g, b, a uint32) {
 	ir := uint32(65534.999 * v.e[0])
 	ig := uint32(65534.999 * v.e[1])
 	ib := uint32(65534.999 * v.e[2])

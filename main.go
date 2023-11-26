@@ -8,25 +8,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func calculateImageHeight(imageWidth int, aspectRatio float64) int {
-	result := int(float64(imageWidth) / aspectRatio)
-
-	if result < 1 {
-		result = 1
-	}
-
-	return result
-}
-
-func getPixelIndex(x, y, imageWidth int) int {
-	return y*imageWidth + x
-}
-
-func raycastScene(imageWidth int, aspectRatio float64, updateProgress func(percentageComplete float64)) []Vec3 {
+func raycastScene(imageWidth int, aspectRatio float64, updateProgress func(percentageComplete float64)) []vec3 {
 
 	world := makeHittableList()
-	world.add(makeSphere(MakeVec3(0, 0, -1), 0.5))
-	world.add(makeSphere(MakeVec3(0, -100.5, -1), 100))
+	world.add(makeSphere(makeVec3(0, 0, -1), 0.5))
+	world.add(makeSphere(makeVec3(0, -100.5, -1), 100))
 
 	camera := makeCamera(imageWidth, aspectRatio)
 	camera.onUpdateProgress = updateProgress // TODO

@@ -3,20 +3,20 @@ package main
 import "math"
 
 type sphere struct {
-	center Vec3
+	center vec3
 	radius float64
 }
 
-func makeSphere(center Vec3, radius float64) sphere {
+func makeSphere(center vec3, radius float64) sphere {
 	return sphere{center, radius}
 }
 
 func (s sphere) hit(r Ray, t interval, rec *hitRecord) bool {
-	oc := r.Origin.Subtract(s.center)
+	oc := r.Origin.subtract(s.center)
 
-	a := r.Direction.LengthSquared()
-	halfB := oc.Dot(r.Direction)
-	c := oc.LengthSquared() - s.radius*s.radius
+	a := r.Direction.lengthSquared()
+	halfB := dot(oc, r.Direction)
+	c := oc.lengthSquared() - s.radius*s.radius
 
 	discriminant := halfB*halfB - a*c
 	if discriminant < 0 {
@@ -35,7 +35,7 @@ func (s sphere) hit(r Ray, t interval, rec *hitRecord) bool {
 	rec.t = root
 	rec.p = r.At(rec.t)
 
-	outwardNormal := rec.p.Subtract(s.center).DivideScalar(s.radius)
+	outwardNormal := rec.p.subtract(s.center).divideScalar(s.radius)
 	rec.setFaceNormal(r, outwardNormal)
 
 	return true

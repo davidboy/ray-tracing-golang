@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func writePpm(imageWidth int, aspectRatio float64, imagePixels []Vec3) {
+func writePpm(imageWidth int, aspectRatio float64, imagePixels []vec3) {
 	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
 
 	fmt.Printf("P3\n%d %d\n255\n", imageWidth, imageHeight)
@@ -17,7 +17,7 @@ func writePpm(imageWidth int, aspectRatio float64, imagePixels []Vec3) {
 	}
 }
 
-func (color Vec3) writeAsColor() {
+func (color vec3) writeAsColor() {
 	ir := int(255.999 * color.e[0])
 	ig := int(255.999 * color.e[1])
 	ib := int(255.999 * color.e[2])

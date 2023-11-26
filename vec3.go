@@ -4,142 +4,142 @@ import (
 	"math"
 )
 
-type Vec3 struct {
+type vec3 struct {
 	e [3]float64
 }
 
-func MakeVec3(x, y, z float64) Vec3 {
-	return Vec3{[3]float64{x, y, z}}
+func makeVec3(x, y, z float64) vec3 {
+	return vec3{[3]float64{x, y, z}}
 }
 
-func MakeVec3Ref(x, y, z float64) *Vec3 {
-	return &Vec3{[3]float64{x, y, z}}
+func makeVec3Ref(x, y, z float64) *vec3 {
+	return &vec3{[3]float64{x, y, z}}
 }
 
-func (v Vec3) Negate() Vec3 {
-	return Vec3{[3]float64{-v.e[0], -v.e[1], -v.e[2]}}
+func (v vec3) negate() vec3 {
+	return vec3{[3]float64{-v.e[0], -v.e[1], -v.e[2]}}
 }
 
-func (v Vec3) X() float64 {
+func (v vec3) x() float64 {
 	return v.e[0]
 }
 
-func (v Vec3) Y() float64 {
+func (v vec3) y() float64 {
 	return v.e[1]
 }
 
-func (v Vec3) Z() float64 {
+func (v vec3) z() float64 {
 	return v.e[2]
 }
 
-func (a Vec3) Add(b Vec3) Vec3 {
-	return Vec3{[3]float64{a.e[0] + b.e[0], a.e[1] + b.e[1], a.e[2] + b.e[2]}}
+func (a vec3) add(b vec3) vec3 {
+	return vec3{[3]float64{a.e[0] + b.e[0], a.e[1] + b.e[1], a.e[2] + b.e[2]}}
 }
 
-func (a Vec3) AddScalar(t float64) Vec3 {
-	return Vec3{[3]float64{a.e[0] + t, a.e[1] + t, a.e[2] + t}}
+func (a vec3) addScalar(t float64) vec3 {
+	return vec3{[3]float64{a.e[0] + t, a.e[1] + t, a.e[2] + t}}
 }
 
-func (a *Vec3) AddMut(b Vec3) *Vec3 {
+func (a *vec3) addMut(b vec3) *vec3 {
 	a.e[0] += b.e[0]
 	a.e[1] += b.e[1]
 	a.e[2] += b.e[2]
 	return a
 }
 
-func (a *Vec3) AddScalarMut(t float64) *Vec3 {
+func (a *vec3) addScalarMut(t float64) *vec3 {
 	a.e[0] += t
 	a.e[1] += t
 	a.e[2] += t
 	return a
 }
 
-func (a Vec3) Subtract(b Vec3) Vec3 {
-	return Vec3{[3]float64{a.e[0] - b.e[0], a.e[1] - b.e[1], a.e[2] - b.e[2]}}
+func (a vec3) subtract(b vec3) vec3 {
+	return vec3{[3]float64{a.e[0] - b.e[0], a.e[1] - b.e[1], a.e[2] - b.e[2]}}
 }
 
-func (a *Vec3) SubtractMut(b Vec3) *Vec3 {
+func (a *vec3) subtractMut(b vec3) *vec3 {
 	a.e[0] -= b.e[0]
 	a.e[1] -= b.e[1]
 	a.e[2] -= b.e[2]
 	return a
 }
 
-func (a Vec3) SubtractScalar(t float64) Vec3 {
-	return Vec3{[3]float64{a.e[0] - t, a.e[1] - t, a.e[2] - t}}
+func (a vec3) subtractScalar(t float64) vec3 {
+	return vec3{[3]float64{a.e[0] - t, a.e[1] - t, a.e[2] - t}}
 }
 
-func (a *Vec3) SubtractScalarMut(t float64) *Vec3 {
+func (a *vec3) subtractScalarMut(t float64) *vec3 {
 	a.e[0] -= t
 	a.e[1] -= t
 	a.e[2] -= t
 	return a
 }
 
-func (a Vec3) Multiply(b Vec3) Vec3 {
-	return Vec3{[3]float64{a.e[0] * b.e[0], a.e[1] * b.e[1], a.e[2] * b.e[2]}}
+func (a vec3) multiply(b vec3) vec3 {
+	return vec3{[3]float64{a.e[0] * b.e[0], a.e[1] * b.e[1], a.e[2] * b.e[2]}}
 }
 
-func (a Vec3) MultiplyScalar(t float64) Vec3 {
-	return Vec3{[3]float64{a.e[0] * t, a.e[1] * t, a.e[2] * t}}
+func (a vec3) multiplyScalar(t float64) vec3 {
+	return vec3{[3]float64{a.e[0] * t, a.e[1] * t, a.e[2] * t}}
 }
 
-func (a *Vec3) MultiplyMut(b Vec3) *Vec3 {
+func (a *vec3) multiplyMut(b vec3) *vec3 {
 	a.e[0] *= b.e[0]
 	a.e[1] *= b.e[1]
 	a.e[2] *= b.e[2]
 	return a
 }
 
-func (a *Vec3) MultiplyScalarMut(t float64) *Vec3 {
+func (a *vec3) multiplyScalarMut(t float64) *vec3 {
 	a.e[0] *= t
 	a.e[1] *= t
 	a.e[2] *= t
 	return a
 }
 
-func (a Vec3) Divide(b Vec3) Vec3 {
-	return Vec3{[3]float64{a.e[0] / b.e[0], a.e[1] / b.e[1], a.e[2] / b.e[2]}}
+func (a vec3) divide(b vec3) vec3 {
+	return vec3{[3]float64{a.e[0] / b.e[0], a.e[1] / b.e[1], a.e[2] / b.e[2]}}
 }
 
-func (a Vec3) DivideScalar(t float64) Vec3 {
-	return Vec3{[3]float64{a.e[0] / t, a.e[1] / t, a.e[2] / t}}
+func (a vec3) divideScalar(t float64) vec3 {
+	return vec3{[3]float64{a.e[0] / t, a.e[1] / t, a.e[2] / t}}
 }
 
-func (a *Vec3) DivideMut(b Vec3) *Vec3 {
+func (a *vec3) divideMut(b vec3) *vec3 {
 	a.e[0] /= b.e[0]
 	a.e[1] /= b.e[1]
 	a.e[2] /= b.e[2]
 	return a
 }
 
-func (a *Vec3) DivideScalarMut(t float64) *Vec3 {
+func (a *vec3) divideScalarMut(t float64) *vec3 {
 	a.e[0] /= t
 	a.e[1] /= t
 	a.e[2] /= t
 	return a
 }
 
-func (a Vec3) Dot(b Vec3) float64 {
+func dot(a vec3, b vec3) float64 {
 	return a.e[0]*b.e[0] + a.e[1]*b.e[1] + a.e[2]*b.e[2]
 }
 
-func Cross(a Vec3, b Vec3) Vec3 {
-	return Vec3{[3]float64{
+func cross(a vec3, b vec3) vec3 {
+	return vec3{[3]float64{
 		a.e[1]*b.e[2] - a.e[2]*b.e[1],
 		a.e[2]*b.e[0] - a.e[0]*b.e[2],
 		a.e[0]*b.e[1] - a.e[1]*b.e[0],
 	}}
 }
 
-func (a Vec3) Length() float64 {
-	return math.Sqrt(a.LengthSquared())
+func (a vec3) length() float64 {
+	return math.Sqrt(a.lengthSquared())
 }
 
-func (a Vec3) LengthSquared() float64 {
+func (a vec3) lengthSquared() float64 {
 	return a.e[0]*a.e[0] + a.e[1]*a.e[1] + a.e[2]*a.e[2]
 }
 
-func (a Vec3) UnitVector() Vec3 {
-	return a.DivideScalar(a.Length())
+func (a vec3) unitVector() vec3 {
+	return a.divideScalar(a.length())
 }

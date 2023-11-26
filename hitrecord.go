@@ -1,18 +1,18 @@
 package main
 
 type hitRecord struct {
-	p         Vec3
-	normal    Vec3
+	p         vec3
+	normal    vec3
 	t         float64
 	frontFace bool
 }
 
-func (rec *hitRecord) setFaceNormal(r Ray, outwardNormal Vec3) {
-	rec.frontFace = r.Direction.Dot(outwardNormal) < 0
+func (rec *hitRecord) setFaceNormal(r Ray, outwardNormal vec3) {
+	rec.frontFace = dot(r.Direction, outwardNormal) < 0
 
 	if rec.frontFace {
 		rec.normal = outwardNormal
 	} else {
-		rec.normal = outwardNormal.Negate()
+		rec.normal = outwardNormal.negate()
 	}
 }
