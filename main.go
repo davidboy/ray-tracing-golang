@@ -17,7 +17,9 @@ func raycastScene(imageWidth int, aspectRatio float64, updateProgress func(perce
 	camera := makeCamera(imageWidth, aspectRatio, 100)
 	camera.onUpdateProgress = updateProgress // TODO
 
-	return camera.render(world)
+	render := camera.render(world)
+
+	return render.squash()
 }
 
 const imageWidth = 400

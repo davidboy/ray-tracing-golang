@@ -1,5 +1,7 @@
 package main
 
+import "sync"
+
 type camera struct {
 	imageWidth  int
 	imageHeight int
@@ -13,6 +15,45 @@ type camera struct {
 	pixelDeltaV vec3 // offset to pixel below
 
 	onUpdateProgress func(progress float64)
+}
+
+type render struct {
+	samples int    // number of samples that have been taken
+	pixels  []vec3 // rendered pixels
+
+	finished bool // whether the render has finished
+
+	mu sync.Mutex
+}
+
+func makeRender(imageWidth, imageHeight int) *render {
+	return &render{
+		pixels: make([]vec3, imageWidth*imageHeight),
+	}
+}
+
+func (r *render) addSample(pixels []vec3) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for i, pixel := range pixels {
+		r.pixels[i].addMut(pixel)
+	}
+
+	r.samples++
+}
+
+func (r *render) squash() []vec3 {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	result := make([]vec3, len(r.pixels))
+
+	for i, pixel := range r.pixels {
+		result[i] = pixel.divideScalar(float64(r.samples))
+	}
+
+	return result
 }
 
 func makeCamera(imageWidth int, aspectRatio float64, samples int) *camera {
@@ -54,7 +95,10 @@ func makeCamera(imageWidth int, aspectRatio float64, samples int) *camera {
 
 }
 
-func (c *camera) render(world hittable) []vec3 {
+func (c *camera) render(world hittable) *render {
+
+	result := makeRender(c.imageWidth, c.imageHeight)
+
 	pixels := make([]vec3, c.imageWidth*c.imageHeight)
 
 	intensity := makeInterval(0.000, 0.999)
@@ -76,17 +120,12 @@ func (c *camera) render(world hittable) []vec3 {
 
 			pixels[getPixelIndex(x, y, imageWidth)] = pixelColor
 
-			// pixelCenter := c.pixel00Loc.
-			// 	add(c.pixelDeltaU.multiplyScalar(float64(x))).
-			// 	add(c.pixelDeltaV.multiplyScalar(float64(y)))
-
-			// rayDirection := pixelCenter.subtract(c.center)
-
-			// pixels[getPixelIndex(x, y, imageWidth)] = rayColor(ray, world)
 		}
 	}
 
-	return pixels
+	result.addSample(pixels)
+
+	return result
 }
 
 var white = makeVec3(1.0, 1.0, 1.0)
