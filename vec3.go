@@ -121,7 +121,7 @@ func (a *Vec3) DivideScalarMut(t float64) *Vec3 {
 	return a
 }
 
-func Dot(a Vec3, b Vec3) float64 {
+func (a Vec3) Dot(b Vec3) float64 {
 	return a.e[0]*b.e[0] + a.e[1]*b.e[1] + a.e[2]*b.e[2]
 }
 

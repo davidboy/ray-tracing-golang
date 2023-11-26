@@ -1,8 +1,8 @@
 package main
 
 type Ray struct {
-	origin    Vec3
-	direction Vec3
+	Origin    Vec3
+	Direction Vec3
 }
 
 func MakeRay(origin, direction Vec3) Ray {
@@ -10,5 +10,5 @@ func MakeRay(origin, direction Vec3) Ray {
 }
 
 func (r Ray) At(t float64) Vec3 {
-	return r.origin.Add(r.direction.MultiplyScalar(t))
+	return r.Origin.Add(r.Direction.MultiplyScalar(t))
 }

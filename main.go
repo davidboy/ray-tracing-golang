@@ -5,8 +5,21 @@ import (
 	"os"
 )
 
+func hitSphere(center Vec3, radius float64, r Ray) bool {
+	oc := r.Origin.Subtract(center)
+	a := r.Direction.Dot(r.Direction)
+	b := 2.0 * oc.Dot(r.Direction)
+	c := oc.Dot(oc) - radius*radius
+	discriminant := b*b - 4*a*c
+	return discriminant >= 0
+}
+
 func rayColor(r Ray) Vec3 {
-	unitDirection := r.direction.UnitVector()
+	if hitSphere(MakeVec3(0, 0, -1), 0.5, r) {
+		return MakeVec3(1, 0, 0)
+	}
+
+	unitDirection := r.Direction.UnitVector()
 	a := 0.5 * (unitDirection.Y() + 1.0)
 
 	white := MakeVec3(1.0, 1.0, 1.0)
