@@ -12,8 +12,34 @@ func makeVec3(x, y, z float64) vec3 {
 	return vec3{[3]float64{x, y, z}}
 }
 
-func makeVec3Ref(x, y, z float64) *vec3 {
-	return &vec3{[3]float64{x, y, z}}
+func randVec() vec3 {
+	return vec3{[3]float64{rand(), rand(), rand()}}
+}
+
+func randVecB(min, max float64) vec3 {
+	return vec3{[3]float64{randb(min, max), randb(min, max), randb(min, max)}}
+}
+
+func randVecInUnitSphere() vec3 {
+	for {
+		p := randVecB(-1, 1)
+		if p.lengthSquared() < 1 {
+			return p
+		}
+	}
+}
+
+func randUnitVector() vec3 {
+	return randVecInUnitSphere().unitVector()
+}
+
+func randVectorOnHemisphere(normal vec3) vec3 {
+	onUnitSphere := randVecInUnitSphere()
+	if dot(onUnitSphere, normal) > 0.0 {
+		return onUnitSphere
+	} else {
+		return onUnitSphere.negate()
+	}
 }
 
 func (v vec3) negate() vec3 {

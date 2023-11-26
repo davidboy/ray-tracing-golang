@@ -2,6 +2,9 @@ package main
 
 import "sync"
 
+// TODO: consolidate all quality-related options
+const max_depth = 10 // maximum number of bounces
+
 type camera struct {
 	imageWidth  int
 	imageHeight int
@@ -109,7 +112,7 @@ func (r *render) run(samples int) {
 				ray := r.c.getRay(x, y)
 
 				pixelIndex := getPixelIndex(x, y, imageWidth)
-				pixelColor := rayColor(ray, r.w)
+				pixelColor := rayColor(ray, max_depth, r.w)
 
 				pixels[pixelIndex] = pixelColor
 			}
@@ -145,11 +148,17 @@ func (c *camera) pixelSampleSquare() vec3 {
 	return c.pixelDeltaU.multiplyScalar(px).add(c.pixelDeltaV.multiplyScalar(py))
 }
 
-func rayColor(r Ray, world hittable) vec3 {
+func rayColor(r Ray, depth int, world hittable) vec3 {
 	var rec hitRecord
 
+	if depth <= 0 {
+		return makeVec3(0, 0, 0)
+	}
+
 	if world.hit(r, makeInterval(0.0, infinity), &rec) {
-		return rec.normal.addScalar(1.0).multiplyScalar(0.5)
+		direction := randVectorOnHemisphere(rec.normal)
+
+		return rayColor(makeRay(rec.p, direction), depth-1, world).multiplyScalar(0.5)
 	}
 
 	unitDirection := r.direction.unitVector()
