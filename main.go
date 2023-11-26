@@ -1,12 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"runtime"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func renderScene(imageWidth int, aspectRatio float64) *render {
+
+	samples := 1000
+	threads := runtime.NumCPU()
 
 	world := makeHittableList()
 	world.add(makeSphere(makeVec3(0, 0, -1), 0.5))
@@ -14,13 +19,18 @@ func renderScene(imageWidth int, aspectRatio float64) *render {
 
 	camera := makeCamera(imageWidth, aspectRatio, 1000)
 
+	fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", camera.imageWidth, camera.imageHeight, samples, threads)
+
 	render := camera.render(world)
-	go render.run()
+
+	for i := 0; i < threads; i++ {
+		go render.run(max(1, samples/threads))
+	}
 
 	return render
 }
 
-const imageWidth = 800
+const imageWidth = 200
 const aspectRatio = 16.0 / 9.0
 
 func ppmMain() {

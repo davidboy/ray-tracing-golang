@@ -7,8 +7,6 @@ type camera struct {
 	imageHeight int
 	aspectRatio float64
 
-	samples int
-
 	center      vec3 // camera center
 	pixel00Loc  vec3 // location of pixel (0, 0)
 	pixelDeltaU vec3 // offset to pixel to the right
@@ -93,8 +91,6 @@ func makeCamera(imageWidth int, aspectRatio float64, samples int) *camera {
 		imageHeight: imageHeight,
 		aspectRatio: aspectRatio,
 
-		samples: samples,
-
 		center:      center,
 		pixel00Loc:  pixel00Loc,
 		pixelDeltaU: pixelDeltaU,
@@ -103,8 +99,8 @@ func makeCamera(imageWidth int, aspectRatio float64, samples int) *camera {
 
 }
 
-func (r *render) run() {
-	for sample := 0; sample < r.c.samples; sample++ {
+func (r *render) run(samples int) {
+	for sample := 0; sample < samples; sample++ {
 
 		pixels := make([]vec3, r.c.imageWidth*r.c.imageHeight)
 
