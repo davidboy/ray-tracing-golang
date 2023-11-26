@@ -26,7 +26,7 @@ func (rec *hitRecord) setFaceNormal(r Ray, outwardNormal Vec3) {
 }
 
 type hittable interface {
-	hit(r Ray, tMin float64, tMax float64, rec *hitRecord) bool
+	hit(r Ray, t interval, rec *hitRecord) bool
 }
 
 type hittableList struct {
@@ -45,14 +45,14 @@ func (l *hittableList) add(h hittable) {
 	l.hittables = append(l.hittables, h)
 }
 
-func (l hittableList) hit(r Ray, tMin float64, tMax float64, rec *hitRecord) bool {
+func (l hittableList) hit(r Ray, t interval, rec *hitRecord) bool {
 	var tempRec hitRecord
 
 	hitAnything := false
-	closestSoFar := tMax
+	closestSoFar := t.max
 
 	for _, hittable := range l.hittables {
-		if hittable.hit(r, tMin, closestSoFar, &tempRec) {
+		if hittable.hit(r, makeInterval(t.min, closestSoFar), &tempRec) {
 			hitAnything = true
 			closestSoFar = tempRec.t
 			*rec = tempRec
@@ -65,7 +65,7 @@ func (l hittableList) hit(r Ray, tMin float64, tMax float64, rec *hitRecord) boo
 func rayColor(r Ray, world hittable) Vec3 {
 	var rec hitRecord
 
-	if world.hit(r, 0.0, infinity, &rec) {
+	if world.hit(r, makeInterval(0.0, infinity), &rec) {
 		return rec.normal.AddScalar(1.0).MultiplyScalar(0.5)
 	}
 

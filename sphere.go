@@ -11,7 +11,7 @@ func makeSphere(center Vec3, radius float64) sphere {
 	return sphere{center, radius}
 }
 
-func (s sphere) hit(r Ray, tMin float64, tMax float64, rec *hitRecord) bool {
+func (s sphere) hit(r Ray, t interval, rec *hitRecord) bool {
 	oc := r.Origin.Subtract(s.center)
 
 	a := r.Direction.LengthSquared()
@@ -25,9 +25,9 @@ func (s sphere) hit(r Ray, tMin float64, tMax float64, rec *hitRecord) bool {
 	sqrtd := math.Sqrt(discriminant)
 
 	root := (-halfB - sqrtd) / a
-	if root <= tMin || tMax <= root {
+	if !t.surrounds(root) {
 		root = (-halfB + sqrtd) / a
-		if root <= tMin || tMax <= root {
+		if !t.surrounds(root) {
 			return false
 		}
 	}
