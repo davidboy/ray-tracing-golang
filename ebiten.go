@@ -4,7 +4,23 @@ import "github.com/hajimehoshi/ebiten/v2"
 
 type Game struct {
 	imageWidth, imageHeight int
-	imagePixels             []Vec3
+
+	image       *ebiten.Image
+	imagePixels []Vec3
+	imageDirty  bool
+}
+
+func makeGame() *Game {
+	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
+
+	return &Game{
+		imageWidth:  imageWidth,
+		imageHeight: imageHeight,
+
+		image:       ebiten.NewImage(imageWidth, imageHeight),
+		imagePixels: make([]Vec3, imageWidth*imageHeight),
+		imageDirty:  true,
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -12,18 +28,28 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func (g *Game) Update() error {
+	if g.imageDirty {
+
+		for x := 0; x < g.imageWidth; x++ {
+			for y := 0; y < g.imageHeight; y++ {
+				index := getPixelIndex(x, y, g.imageWidth)
+				g.image.Set(x, y, g.imagePixels[index])
+			}
+		}
+
+		g.imageDirty = false
+	}
+
 	return nil
 }
 
-func (g *Game) Draw(image *ebiten.Image) {
-	image.Clear()
+func (g *Game) SetPixels(imagePixels *[]Vec3) {
+	g.imagePixels = *imagePixels
+	g.imageDirty = true
+}
 
-	for x := 0; x < g.imageWidth; x++ {
-		for y := 0; y < g.imageHeight; y++ {
-			index := getPixelIndex(x, y, g.imageWidth)
-			image.Set(x, y, g.imagePixels[index])
-		}
-	}
+func (g *Game) Draw(image *ebiten.Image) {
+	image.DrawImage(g.image, nil)
 }
 
 func (v Vec3) RGBA() (r, g, b, a uint32) {

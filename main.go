@@ -100,15 +100,14 @@ func ebitenMain() {
 
 	fmt.Fprintf(os.Stdout, "\rDone.                                       \n")
 
-	game := &Game{
-		imageWidth:  imageWidth,
-		imageHeight: calculateImageHeight(imageWidth, aspectRatio),
+	game := makeGame()
 
-		imagePixels: imagePixels,
-	}
+	game.SetPixels(&imagePixels)
 
 	ebiten.SetWindowSize(game.imageWidth, game.imageHeight)
 	ebiten.SetWindowTitle("Raytracer")
+
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
