@@ -19,13 +19,13 @@ func main() {
 			g := float64(y) / float64(image_height-1)
 			b := 0.0
 
-			ir := int(255.999 * r)
-			ig := int(255.999 * g)
-			ib := int(255.999 * b)
-
-			fmt.Printf("%d %d %d\n", ir, ig, ib)
+			MakeVec3(r, g, b).WriteAsColor()
 		}
 	}
 
 	fmt.Fprintf(os.Stderr, "\rDone.                 \n")
+
+	mv := Vec3{[3]float64{1.0, 2.0, 3.0}}
+
+	mv.Negate()
 }
