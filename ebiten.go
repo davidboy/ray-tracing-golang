@@ -33,7 +33,7 @@ func (g *Game) Update() error {
 		for x := 0; x < g.imageWidth; x++ {
 			for y := 0; y < g.imageHeight; y++ {
 				index := getPixelIndex(x, y, g.imageWidth)
-				g.image.Set(x, y, g.imagePixels[index])
+				g.image.Set(x, g.imageHeight-y, g.imagePixels[index])
 			}
 		}
 
