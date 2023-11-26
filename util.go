@@ -32,3 +32,11 @@ func rand() float64 {
 func randb(min, max float64) float64 {
 	return min + (max-min)*rand()
 }
+
+func linearToGamma(linear float64) float64 {
+	return math.Sqrt(linear)
+}
+
+func (v vec3) toGammaSpace() vec3 {
+	return makeVec3(linearToGamma(v.x()), linearToGamma(v.y()), linearToGamma(v.z()))
+}

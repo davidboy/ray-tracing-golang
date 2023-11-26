@@ -59,7 +59,7 @@ func (r *render) squash() []vec3 {
 	result := make([]vec3, len(r.pixels))
 
 	for i, pixel := range r.pixels {
-		result[i] = pixel.divideScalar(float64(r.samples)).clamp(pixelIntensity)
+		result[i] = pixel.divideScalar(float64(r.samples)).clamp(pixelIntensity).toGammaSpace()
 	}
 
 	r.dirty = false
