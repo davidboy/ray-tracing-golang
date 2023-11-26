@@ -5,21 +5,31 @@ import (
 	"log"
 	"os"
 
+	"math"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func hitSphere(center Vec3, radius float64, r Ray) bool {
+func hitSphere(center Vec3, radius float64, r Ray) float64 {
 	oc := r.Origin.Subtract(center)
 	a := r.Direction.Dot(r.Direction)
 	b := 2.0 * oc.Dot(r.Direction)
 	c := oc.Dot(oc) - radius*radius
 	discriminant := b*b - 4*a*c
-	return discriminant >= 0
+
+	if discriminant < 0 {
+		return -1.0
+	} else {
+		return (-b - math.Sqrt(discriminant)) / (2.0 * a)
+	}
+
 }
 
 func rayColor(r Ray) Vec3 {
-	if hitSphere(MakeVec3(0, 0, -1), 0.5, r) {
-		return MakeVec3(1, 0, 0)
+	t := hitSphere(MakeVec3(0, 0, -1), 0.5, r)
+	if t > 0.0 {
+		n := r.At(t).Subtract(MakeVec3(0, 0, -1)).UnitVector()
+		return MakeVec3(n.X()+1, n.Y()+1, n.Z()+1).MultiplyScalar(0.5)
 	}
 
 	unitDirection := r.Direction.UnitVector()
