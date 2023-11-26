@@ -155,7 +155,7 @@ func rayColor(r Ray, depth int, world hittable) vec3 {
 		return makeVec3(0, 0, 0)
 	}
 
-	if world.hit(r, makeInterval(0.0, infinity), &rec) {
+	if world.hit(r, makeInterval(0.001, infinity), &rec) {
 		direction := randVectorOnHemisphere(rec.normal)
 
 		return rayColor(makeRay(rec.p, direction), depth-1, world).multiplyScalar(0.5)
