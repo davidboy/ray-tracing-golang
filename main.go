@@ -10,12 +10,14 @@ import (
 
 func renderScene(imageWidth int, aspectRatio float64) *render {
 
-	samples := 1000
+	samples := 10000
 	threads := runtime.NumCPU()
 
 	world := makeHittableList()
+	world.add(makeSphere(makeVec3(0, -100.5, -1), 100)) // ground
 	world.add(makeSphere(makeVec3(0, 0, -1), 0.5))
-	world.add(makeSphere(makeVec3(0, -100.5, -1), 100))
+	world.add(makeSphere(makeVec3(-1, 0, -1), 0.5))
+	world.add(makeSphere(makeVec3(1, 0, -1), 0.5))
 
 	camera := makeCamera(imageWidth, aspectRatio, 1000)
 
@@ -30,7 +32,7 @@ func renderScene(imageWidth int, aspectRatio float64) *render {
 	return render
 }
 
-const imageWidth = 200
+const imageWidth = 320
 const aspectRatio = 16.0 / 9.0
 
 func ppmMain() {
