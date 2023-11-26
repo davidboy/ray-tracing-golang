@@ -28,17 +28,19 @@ func rayColor(r Ray) Vec3 {
 	return white.MultiplyScalar(1.0 - a).Add(blue.MultiplyScalar(a))
 }
 
-func main() {
+func calculateImageHeight(imageWidth int, aspectRatio float64) int {
+	return int(float64(imageWidth) / aspectRatio)
+}
 
-	// Image
+func getPixelIndex(x, y, imageWidth int) int {
+	return y*imageWidth + x
+}
 
-	aspectRatio := 16.0 / 9.0
-
-	imageWidth := 400
-	imageHeight := int(float64(imageWidth) / aspectRatio)
+func raycastScene(imageWidth int, aspectRatio float64, updateProgress func(percentageComplete float64)) []Vec3 {
+	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
+	pixels := make([]Vec3, imageWidth*imageHeight)
 
 	// Camera
-
 	focalLength := 1.0
 	viewportHeight := 2.0
 	viewportWidth := viewportHeight * (float64(imageWidth) / float64(imageHeight))
@@ -57,28 +59,37 @@ func main() {
 
 	pixel00Loc := viewportUpperLeft.Add(pixelDeltaU.Add(pixelDeltaV).MultiplyScalar(0.5))
 
-	fmt.Printf("P3\n%d %d\n255\n", imageWidth, imageHeight)
+	for x := 0; x < imageWidth; x++ {
+		updateProgress(float64(x) / float64(imageWidth))
 
-	for y := imageHeight - 1; y >= 0; y-- {
-		fmt.Fprintf(os.Stderr, "\rScanlines remaining: %d ", y)
-
-		for x := 0; x < imageWidth; x++ {
+		for y := 0; y < imageHeight; y++ {
 			pixelCenter := pixel00Loc.
 				Add(pixelDeltaU.MultiplyScalar(float64(x))).
 				Add(pixelDeltaV.MultiplyScalar(float64(y)))
 
 			rayDirection := pixelCenter.Subtract(cameraCenter)
-
 			ray := MakeRay(cameraCenter, rayDirection)
 
-			pixelColor := rayColor(ray)
-			pixelColor.WriteAsColor()
+			pixels[getPixelIndex(x, y, imageWidth)] = rayColor(ray)
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "\rDone.                 \n")
+	return pixels
+}
 
-	mv := Vec3{[3]float64{1.0, 2.0, 3.0}}
+const imageWidth = 400
+const aspectRatio = 16.0 / 9.0
 
-	mv.Negate()
+func ppmMain() {
+	imagePixels := raycastScene(imageWidth, aspectRatio, func(percentageComplete float64) {
+		fmt.Fprintf(os.Stderr, "\rPercentage complete: %.2f", percentageComplete*100)
+	})
+
+	writePpm(imageWidth, aspectRatio, imagePixels)
+
+	fmt.Fprintf(os.Stderr, "\rDone.                                       \n")
+}
+
+func main() {
+	ppmMain()
 }

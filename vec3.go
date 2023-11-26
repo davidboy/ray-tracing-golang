@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -143,11 +142,4 @@ func (a Vec3) LengthSquared() float64 {
 
 func (a Vec3) UnitVector() Vec3 {
 	return a.DivideScalar(a.Length())
-}
-
-func (color Vec3) WriteAsColor() {
-	ir := int(255.999 * color.e[0])
-	ig := int(255.999 * color.e[1])
-	ib := int(255.999 * color.e[2])
-	fmt.Printf("%d %d %d\n", ir, ig, ib)
 }
