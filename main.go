@@ -5,32 +5,68 @@ import (
 	"log"
 	"os"
 
-	"math"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func hitSphere(center Vec3, radius float64, r Ray) float64 {
-	oc := r.Origin.Subtract(center)
-
-	a := r.Direction.LengthSquared()
-	halfB := oc.Dot(r.Direction)
-	c := oc.LengthSquared() - radius*radius
-	discriminant := halfB*halfB - a*c
-
-	if discriminant < 0 {
-		return -1.0
-	} else {
-		return (-halfB - math.Sqrt(discriminant)) / a
-	}
-
+type hitRecord struct {
+	p         Vec3
+	normal    Vec3
+	t         float64
+	frontFace bool
 }
 
-func rayColor(r Ray) Vec3 {
-	t := hitSphere(MakeVec3(0, 0, -1), 0.5, r)
-	if t > 0.0 {
-		n := r.At(t).Subtract(MakeVec3(0, 0, -1)).UnitVector()
-		return MakeVec3(n.X()+1, n.Y()+1, n.Z()+1).MultiplyScalar(0.5)
+func (rec *hitRecord) setFaceNormal(r Ray, outwardNormal Vec3) {
+	rec.frontFace = r.Direction.Dot(outwardNormal) < 0
+
+	if rec.frontFace {
+		rec.normal = outwardNormal
+	} else {
+		rec.normal = outwardNormal.Negate()
+	}
+}
+
+type hittable interface {
+	hit(r Ray, tMin float64, tMax float64, rec *hitRecord) bool
+}
+
+type hittableList struct {
+	hittables []hittable
+}
+
+func makeHittableList() hittableList {
+	return hittableList{make([]hittable, 0)}
+}
+
+func (l *hittableList) clear() {
+	l.hittables = make([]hittable, 0)
+}
+
+func (l *hittableList) add(h hittable) {
+	l.hittables = append(l.hittables, h)
+}
+
+func (l hittableList) hit(r Ray, tMin float64, tMax float64, rec *hitRecord) bool {
+	var tempRec hitRecord
+
+	hitAnything := false
+	closestSoFar := tMax
+
+	for _, hittable := range l.hittables {
+		if hittable.hit(r, tMin, closestSoFar, &tempRec) {
+			hitAnything = true
+			closestSoFar = tempRec.t
+			*rec = tempRec
+		}
+	}
+
+	return hitAnything
+}
+
+func rayColor(r Ray, world hittable) Vec3 {
+	var rec hitRecord
+
+	if world.hit(r, 0.0, infinity, &rec) {
+		return rec.normal.AddScalar(1.0).MultiplyScalar(0.5)
 	}
 
 	unitDirection := r.Direction.UnitVector()
@@ -43,7 +79,13 @@ func rayColor(r Ray) Vec3 {
 }
 
 func calculateImageHeight(imageWidth int, aspectRatio float64) int {
-	return int(float64(imageWidth) / aspectRatio)
+	result := int(float64(imageWidth) / aspectRatio)
+
+	if result < 1 {
+		result = 1
+	}
+
+	return result
 }
 
 func getPixelIndex(x, y, imageWidth int) int {
@@ -51,10 +93,19 @@ func getPixelIndex(x, y, imageWidth int) int {
 }
 
 func raycastScene(imageWidth int, aspectRatio float64, updateProgress func(percentageComplete float64)) []Vec3 {
+	// Image
+
 	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
 	pixels := make([]Vec3, imageWidth*imageHeight)
 
+	// World
+
+	world := makeHittableList()
+	world.add(makeSphere(MakeVec3(0, 0, -1), 0.5))
+	world.add(makeSphere(MakeVec3(0, -100.5, -1), 100))
+
 	// Camera
+
 	focalLength := 1.0
 	viewportHeight := 2.0
 	viewportWidth := viewportHeight * (float64(imageWidth) / float64(imageHeight))
@@ -84,7 +135,7 @@ func raycastScene(imageWidth int, aspectRatio float64, updateProgress func(perce
 			rayDirection := pixelCenter.Subtract(cameraCenter)
 			ray := MakeRay(cameraCenter, rayDirection)
 
-			pixels[getPixelIndex(x, y, imageWidth)] = rayColor(ray)
+			pixels[getPixelIndex(x, y, imageWidth)] = rayColor(ray, world)
 		}
 	}
 
