@@ -10,7 +10,7 @@ import (
 
 func renderScene(imageWidth int, aspectRatio float64) *render {
 
-	samples := 10000
+	samples := 1000
 	threads := runtime.NumCPU()
 
 	world := makeHittableList()
@@ -26,7 +26,7 @@ func renderScene(imageWidth int, aspectRatio float64) *render {
 	render := camera.render(world)
 
 	for i := 0; i < threads; i++ {
-		go render.run(max(1, samples/threads))
+		go render.run(max(1, samples/threads), i)
 	}
 
 	return render

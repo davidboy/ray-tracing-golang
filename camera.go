@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 // TODO: consolidate all quality-related options
 const max_depth = 10 // maximum number of bounces
@@ -102,7 +105,7 @@ func makeCamera(imageWidth int, aspectRatio float64, samples int) *camera {
 
 }
 
-func (r *render) run(samples int) {
+func (r *render) run(samples int, id int) {
 	for sample := 0; sample < samples; sample++ {
 
 		pixels := make([]vec3, r.c.imageWidth*r.c.imageHeight)
@@ -120,6 +123,8 @@ func (r *render) run(samples int) {
 
 		r.addSample(pixels)
 	}
+
+	fmt.Printf("Thread %d finished\n", id)
 }
 
 func (c *camera) render(world hittable) *render {
