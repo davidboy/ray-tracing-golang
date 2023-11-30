@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 type material interface {
 	scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, attenuation vec3)
 }
@@ -49,9 +51,20 @@ func (d dielectric) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *r
 	}
 
 	unitDirection := r.direction.unitVector()
-	refracted := unitDirection.refract(rec.normal, refractionRatio)
+	cosTheta := min(dot(unitDirection.negate(), rec.normal), 1.0)
+	sinTheta := math.Sqrt(1.0 - cosTheta*cosTheta)
 
-	scatteredRay := makeRay(rec.p, refracted)
+	cannotRefract := refractionRatio*sinTheta > 1.0
+
+	var direction vec3
+
+	if cannotRefract {
+		direction = unitDirection.reflect(rec.normal)
+	} else {
+		direction = unitDirection.refract(rec.normal, refractionRatio)
+	}
+
+	scatteredRay := makeRay(rec.p, direction)
 
 	return false, &scatteredRay, attenuation
 }
