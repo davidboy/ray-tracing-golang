@@ -134,7 +134,7 @@ func (c *camera) render(world hittable) *render {
 var white = makeVec3(1.0, 1.0, 1.0)
 var blue = makeVec3(0.5, 0.7, 1.0)
 
-func (c *camera) getRay(x, y int) Ray {
+func (c *camera) getRay(x, y int) ray {
 	pixelCenter := c.pixel00Loc.
 		add(c.pixelDeltaU.multiplyScalar(float64(x))).
 		add(c.pixelDeltaV.multiplyScalar(float64(y)))
@@ -153,7 +153,7 @@ func (c *camera) pixelSampleSquare() vec3 {
 	return c.pixelDeltaU.multiplyScalar(px).add(c.pixelDeltaV.multiplyScalar(py))
 }
 
-func rayColor(r Ray, depth int, world hittable) vec3 {
+func rayColor(r ray, depth int, world hittable) vec3 {
 	var rec hitRecord
 
 	if depth <= 0 {
@@ -161,9 +161,14 @@ func rayColor(r Ray, depth int, world hittable) vec3 {
 	}
 
 	if world.hit(r, makeInterval(0.001, infinity), &rec) {
-		direction := rec.normal.add(randUnitVector())
 
-		return rayColor(makeRay(rec.p, direction), depth-1, world).multiplyScalar(0.5)
+		absorbed, scattered, attenuation := rec.mat.scatter(&r, &rec)
+
+		if absorbed {
+			return makeVec3(0, 0, 0)
+		}
+
+		return attenuation.multiply(rayColor(*scattered, depth-1, world))
 	}
 
 	unitDirection := r.direction.unitVector()

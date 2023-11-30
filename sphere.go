@@ -5,13 +5,14 @@ import "math"
 type sphere struct {
 	center vec3
 	radius float64
+	mat    material
 }
 
-func makeSphere(center vec3, radius float64) sphere {
-	return sphere{center, radius}
+func makeSphere(center vec3, radius float64, mat material) sphere {
+	return sphere{center, radius, mat}
 }
 
-func (s sphere) hit(r Ray, t interval, rec *hitRecord) bool {
+func (s sphere) hit(r ray, t interval, rec *hitRecord) bool {
 	oc := r.origin.subtract(s.center)
 
 	a := r.direction.lengthSquared()
@@ -37,6 +38,7 @@ func (s sphere) hit(r Ray, t interval, rec *hitRecord) bool {
 
 	outwardNormal := rec.p.subtract(s.center).divideScalar(s.radius)
 	rec.setFaceNormal(r, outwardNormal)
+	rec.mat = s.mat
 
 	return true
 }

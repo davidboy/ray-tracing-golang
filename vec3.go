@@ -42,6 +42,10 @@ func randVectorOnHemisphere(normal vec3) vec3 {
 	}
 }
 
+func (v vec3) reflect(n vec3) vec3 {
+	return v.subtract(n.multiplyScalar(2 * dot(v, n)))
+}
+
 func (v vec3) negate() vec3 {
 	return vec3{[3]float64{-v.e[0], -v.e[1], -v.e[2]}}
 }
@@ -164,6 +168,11 @@ func (a vec3) length() float64 {
 
 func (a vec3) lengthSquared() float64 {
 	return a.e[0]*a.e[0] + a.e[1]*a.e[1] + a.e[2]*a.e[2]
+}
+
+func (a vec3) nearZero() bool {
+	s := 1e-8
+	return (math.Abs(a.e[0]) < s) && (math.Abs(a.e[1]) < s) && (math.Abs(a.e[2]) < s)
 }
 
 func (a vec3) unitVector() vec3 {

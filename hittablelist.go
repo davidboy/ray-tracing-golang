@@ -16,17 +16,15 @@ func (l *hittableList) add(h hittable) {
 	l.hittables = append(l.hittables, h)
 }
 
-func (l hittableList) hit(r Ray, t interval, rec *hitRecord) bool {
-	var tempRec hitRecord
+func (l hittableList) hit(r ray, t interval, rec *hitRecord) bool {
 
 	hitAnything := false
 	closestSoFar := t.max
 
-	for _, hittable := range l.hittables {
-		if hittable.hit(r, makeInterval(t.min, closestSoFar), &tempRec) {
+	for _, object := range l.hittables {
+		if object.hit(r, makeInterval(t.min, closestSoFar), rec) {
 			hitAnything = true
-			closestSoFar = tempRec.t
-			*rec = tempRec
+			closestSoFar = rec.t
 		}
 	}
 
