@@ -20,12 +20,13 @@ func renderScene(imageWidth int, aspectRatio float64) *render {
 
 	material_center := lambertian{makeVec3(0.1, 0.2, 0.5)}
 	material_left := dielectric{1.5}
-	material_right := metal{makeVec3(0.8, 0.6, 0.2), 1.0}
+	material_right := metal{makeVec3(0.8, 0.6, 0.2), 0.0}
 
 	world := makeHittableList()
 	world.add(makeSphere(makeVec3(0, -100.5, -1), 100, material_ground))
 	world.add(makeSphere(makeVec3(0, 0, -1), 0.5, material_center))
 	world.add(makeSphere(makeVec3(-1, 0, -1), 0.5, material_left))
+	world.add(makeSphere(makeVec3(-1, 0, -1), -0.4, material_left))
 	world.add(makeSphere(makeVec3(1, 0, -1), 0.5, material_right))
 
 	camera := makeCamera(imageWidth, aspectRatio, 1000)

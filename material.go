@@ -58,7 +58,7 @@ func (d dielectric) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *r
 
 	var direction vec3
 
-	if cannotRefract {
+	if cannotRefract || reflectance(cosTheta, refractionRatio) > rand() {
 		direction = unitDirection.reflect(rec.normal)
 	} else {
 		direction = unitDirection.refract(rec.normal, refractionRatio)
@@ -67,4 +67,11 @@ func (d dielectric) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *r
 	scatteredRay := makeRay(rec.p, direction)
 
 	return false, &scatteredRay, attenuation
+}
+
+func reflectance(cosine, refIdx float64) float64 {
+	// Use Schlick's approximation for reflectance
+	r0 := (1 - refIdx) / (1 + refIdx)
+	r0 = r0 * r0
+	return r0 + (1-r0)*math.Pow((1-cosine), 5)
 }
