@@ -46,6 +46,13 @@ func (v vec3) reflect(n vec3) vec3 {
 	return v.subtract(n.multiplyScalar(2 * dot(v, n)))
 }
 
+func (uv vec3) refract(n vec3, etaiOverEtai float64) vec3 {
+	cosTheta := min(dot(uv.negate(), n), 1.0)
+	rOutPerp := uv.add(n.multiplyScalar(cosTheta)).multiplyScalar(etaiOverEtai)
+	rOutParallel := n.multiplyScalar(-math.Sqrt(math.Abs(1.0 - rOutPerp.lengthSquared())))
+	return rOutPerp.add(rOutParallel)
+}
+
 func (v vec3) negate() vec3 {
 	return vec3{[3]float64{-v.e[0], -v.e[1], -v.e[2]}}
 }

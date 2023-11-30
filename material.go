@@ -33,3 +33,25 @@ func (m metal) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, a
 
 	return absorbed, &scatteredRay, m.albedo
 }
+
+type dielectric struct {
+	ir float64 // Index of Refraction
+}
+
+func (d dielectric) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, attenuation vec3) {
+	attenuation = makeVec3(1.0, 1.0, 1.0)
+
+	var refractionRatio float64
+	if rec.frontFace {
+		refractionRatio = 1.0 / d.ir
+	} else {
+		refractionRatio = d.ir
+	}
+
+	unitDirection := r.direction.unitVector()
+	refracted := unitDirection.refract(rec.normal, refractionRatio)
+
+	scatteredRay := makeRay(rec.p, refracted)
+
+	return false, &scatteredRay, attenuation
+}

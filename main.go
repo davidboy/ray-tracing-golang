@@ -17,8 +17,15 @@ const samples = 10000
 func renderScene(imageWidth int, aspectRatio float64) *render {
 
 	material_ground := lambertian{makeVec3(0.8, 0.8, 0.0)}
-	material_center := lambertian{makeVec3(0.7, 0.3, 0.3)}
-	material_left := metal{makeVec3(0.8, 0.8, 0.8), 0.3}
+
+	// // old:
+	// material_center := lambertian{makeVec3(0.7, 0.3, 0.3)}
+	// material_left := metal{makeVec3(0.8, 0.8, 0.8), 0.3}
+
+	// glass
+	material_center := dielectric{1.5}
+	material_left := dielectric{1.5}
+
 	material_right := metal{makeVec3(0.8, 0.6, 0.2), 1.0}
 
 	world := makeHittableList()
