@@ -23,11 +23,13 @@ func (l lambertian) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *r
 
 type metal struct {
 	albedo vec3
+	fuzz   float64
 }
 
 func (m metal) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, attenuation vec3) {
 	reflected := r.direction.unitVector().reflect(rec.normal)
-	scatteredRay := makeRay(rec.p, reflected)
+	scatteredRay := makeRay(rec.p, reflected.add(randUnitVector().multiplyScalar(m.fuzz)))
+	absorbed = dot(scatteredRay.direction, rec.normal) <= 0
 
-	return false, &scatteredRay, m.albedo
+	return absorbed, &scatteredRay, m.albedo
 }
