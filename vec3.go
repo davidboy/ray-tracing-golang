@@ -29,6 +29,15 @@ func randVecInUnitSphere() vec3 {
 	}
 }
 
+func randVecInUnitDisk() vec3 {
+	for {
+		p := vec3{[3]float64{randb(-1, 1), randb(-1, 1), 0}}
+		if p.lengthSquared() < 1 {
+			return p
+		}
+	}
+}
+
 func randUnitVector() vec3 {
 	return randVecInUnitSphere().unitVector()
 }

@@ -19,6 +19,9 @@ type cameraParameters struct {
 	lookFrom vec3
 	lookAt   vec3
 	vUp      vec3
+
+	defocusAngle float64
+	focusDist    float64
 }
 
 type camera struct {
@@ -31,6 +34,10 @@ type camera struct {
 	pixelDeltaU vec3 // offset to pixel to the right
 	pixelDeltaV vec3 // offset to pixel below
 	u, v, w     vec3 // camera frame basis vectors
+
+	defocusAngle float64
+	defocusDiskU vec3 // defocus disk horizontal radius
+	defocusDiskV vec3 // defocus disk vertical radius
 }
 
 type render struct {
@@ -92,10 +99,9 @@ func makeCamera(parameters cameraParameters) *camera {
 
 	center := parameters.lookFrom
 
-	focalLength := parameters.lookFrom.subtract(parameters.lookAt).length()
 	theta := degreesToRadians(parameters.vFov)
 	h := math.Tan(theta / 2.0)
-	viewportHeight := 2.0 * h * focalLength
+	viewportHeight := 2.0 * h * parameters.focusDist
 	viewportWidth := viewportHeight * (aspectRatio)
 
 	w := parameters.lookFrom.subtract(parameters.lookAt).unitVector()
@@ -109,11 +115,19 @@ func makeCamera(parameters cameraParameters) *camera {
 	pixelDeltaV := viewportV.divideScalar(float64(parameters.imageHeight))
 
 	viewportUpperLeft := center.
-		subtract(w.multiplyScalar(focalLength)).
+		subtract(w.multiplyScalar(parameters.focusDist)).
 		subtract(viewportU.divideScalar(2.0)).
 		subtract(viewportV.divideScalar(2.0))
 
+	viewportUpperLeft = center.
+		subtract(w.multiplyScalar(parameters.focusDist)).
+		subtract(viewportU.divideScalar(2.0)).
+		subtract(viewportV.divideScalar(2.0))
 	pixel00Loc := viewportUpperLeft.add(pixelDeltaU.add(pixelDeltaV).multiplyScalar(0.5))
+
+	defocusRadius := parameters.focusDist * math.Tan(degreesToRadians(parameters.defocusAngle)/2.0)
+	defocusDiskU := u.multiplyScalar(defocusRadius)
+	defocusDiskV := v.multiplyScalar(defocusRadius)
 
 	return &camera{
 		imageWidth:  imageWidth,
@@ -124,6 +138,10 @@ func makeCamera(parameters cameraParameters) *camera {
 		pixel00Loc:  pixel00Loc,
 		pixelDeltaU: pixelDeltaU,
 		pixelDeltaV: pixelDeltaV,
+
+		defocusAngle: parameters.defocusAngle,
+		defocusDiskU: defocusDiskU,
+		defocusDiskV: defocusDiskV,
 	}
 
 }
@@ -164,7 +182,14 @@ func (c *camera) getRay(x, y int) ray {
 
 	pixelSample := pixelCenter.add(c.pixelSampleSquare())
 
-	rayOrigin := c.center
+	var rayOrigin vec3
+	if c.defocusAngle <= 0 {
+		rayOrigin = c.center
+	} else {
+		p := randVecInUnitDisk()
+		rayOrigin = c.center.add(c.defocusDiskU.multiplyScalar(p.x())).add(c.defocusDiskV.multiplyScalar(p.y()))
+	}
+
 	rayDirection := pixelSample.subtract(rayOrigin)
 
 	return makeRay(rayOrigin, rayDirection)

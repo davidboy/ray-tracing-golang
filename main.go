@@ -61,10 +61,13 @@ var parameters = cameraParameters{
 	imageWidth:  640, // 256,
 	imageHeight: 480, // 144,
 
-	vFov:     75,
+	vFov:     30,
 	lookFrom: makeVec3(-2, 2, 1),
 	lookAt:   makeVec3(0, 0, -1),
 	vUp:      makeVec3(0, 1, 0),
+
+	defocusAngle: 10,
+	focusDist:    3.4,
 }
 
 func ppmMain() {
