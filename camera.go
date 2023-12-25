@@ -9,6 +9,18 @@ import (
 // TODO: consolidate all quality-related options
 const max_depth = 40 // maximum number of bounces
 
+type cameraParameters struct {
+	imageWidth  int
+	imageHeight int
+
+	// TODO: quality options here?
+
+	vFov     float64
+	lookFrom vec3
+	lookAt   vec3
+	vUp      vec3
+}
+
 type camera struct {
 	imageWidth  int
 	imageHeight int
@@ -18,6 +30,7 @@ type camera struct {
 	pixel00Loc  vec3 // location of pixel (0, 0)
 	pixelDeltaU vec3 // offset to pixel to the right
 	pixelDeltaV vec3 // offset to pixel below
+	u, v, w     vec3 // camera frame basis vectors
 }
 
 type render struct {
@@ -71,27 +84,34 @@ func (r *render) squash() []vec3 {
 	return result
 }
 
-func makeCamera(imageWidth int, aspectRatio float64, vFov float64) *camera {
-	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
+func makeCamera(parameters cameraParameters) *camera {
+	imageWidth := parameters.imageWidth
+	imageHeight := parameters.imageHeight
 
-	center := makeVec3(0, 0, 0)
+	aspectRatio := float64(imageWidth) / float64(imageHeight)
 
-	focalLength := 1.0
-	theta := degreesToRadians(vFov)
+	center := parameters.lookFrom
+
+	focalLength := parameters.lookFrom.subtract(parameters.lookAt).length()
+	theta := degreesToRadians(parameters.vFov)
 	h := math.Tan(theta / 2.0)
 	viewportHeight := 2.0 * h * focalLength
-	viewportWidth := viewportHeight * (float64(imageWidth) / float64(imageHeight))
+	viewportWidth := viewportHeight * (aspectRatio)
 
-	viewportU := makeVec3(viewportWidth, 0, 0)
-	viewportV := makeVec3(0, viewportHeight, 0)
+	w := parameters.lookFrom.subtract(parameters.lookAt).unitVector()
+	u := cross(parameters.vUp, w).unitVector()
+	v := cross(w, u)
 
-	pixelDeltaU := viewportU.divideScalar(float64(imageWidth))
-	pixelDeltaV := viewportV.divideScalar(float64(imageHeight))
+	viewportU := u.multiplyScalar(viewportWidth)
+	viewportV := v.multiplyScalar(viewportHeight) // FIXME: negate v?
+
+	pixelDeltaU := viewportU.divideScalar(float64(parameters.imageWidth))
+	pixelDeltaV := viewportV.divideScalar(float64(parameters.imageHeight))
 
 	viewportUpperLeft := center.
-		subtract(makeVec3(0, 0, focalLength)).
-		subtract(viewportU.divideScalar(2)).
-		subtract(viewportV.divideScalar(2))
+		subtract(w.multiplyScalar(focalLength)).
+		subtract(viewportU.divideScalar(2.0)).
+		subtract(viewportV.divideScalar(2.0))
 
 	pixel00Loc := viewportUpperLeft.add(pixelDeltaU.add(pixelDeltaV).multiplyScalar(0.5))
 
@@ -113,11 +133,11 @@ func (r *render) run(samples int, id int) {
 
 		pixels := make([]vec3, r.c.imageWidth*r.c.imageHeight)
 
-		for x := 0; x < imageWidth; x++ {
+		for x := 0; x < r.c.imageWidth; x++ {
 			for y := 0; y < r.c.imageHeight; y++ {
 				ray := r.c.getRay(x, y)
 
-				pixelIndex := getPixelIndex(x, y, imageWidth)
+				pixelIndex := getPixelIndex(x, y, r.c.imageWidth)
 				pixelColor := rayColor(ray, max_depth, r.w)
 
 				pixels[pixelIndex] = pixelColor

@@ -14,7 +14,7 @@ var threads = max(1, runtime.NumCPU()-2)
 
 const samples = 500
 
-func renderScene(imageWidth int, aspectRatio float64) *render {
+func renderScene(parameters cameraParameters) *render {
 
 	material_ground := lambertian{makeVec3(0.8, 0.8, 0.0)}
 
@@ -29,7 +29,7 @@ func renderScene(imageWidth int, aspectRatio float64) *render {
 	world.add(makeSphere(makeVec3(-1, 0, -1), -0.4, material_left))
 	world.add(makeSphere(makeVec3(1, 0, -1), 0.5, material_right))
 
-	camera := makeCamera(imageWidth, aspectRatio, 90.0)
+	camera := makeCamera(parameters)
 
 	render := camera.render(world)
 
@@ -54,11 +54,21 @@ func renderScene(imageWidth int, aspectRatio float64) *render {
 	return render
 }
 
-const imageWidth = 256
-const aspectRatio = 16.0 / 9.0
+// const imageWidth = 256
+// const aspectRatio = 16.0 / 9.0
+
+var parameters = cameraParameters{
+	imageWidth:  640, // 256,
+	imageHeight: 480, // 144,
+
+	vFov:     75,
+	lookFrom: makeVec3(-2, 2, 1),
+	lookAt:   makeVec3(0, 0, -1),
+	vUp:      makeVec3(0, 1, 0),
+}
 
 func ppmMain() {
-	render := renderScene(imageWidth, aspectRatio)
+	render := renderScene(parameters)
 
 	// TODO: progress reporting
 
@@ -68,11 +78,11 @@ func ppmMain() {
 
 	imagePixels := render.squash()
 
-	writePpm(imageWidth, aspectRatio, imagePixels)
+	writePpm(render.c.imageWidth, render.c.aspectRatio, imagePixels)
 }
 
 func ebitenMain() {
-	render := renderScene(imageWidth, aspectRatio)
+	render := renderScene(parameters)
 
 	// TODO: progress reporting
 
