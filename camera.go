@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sync"
 )
 
@@ -70,13 +71,15 @@ func (r *render) squash() []vec3 {
 	return result
 }
 
-func makeCamera(imageWidth int, aspectRatio float64, samples int) *camera {
+func makeCamera(imageWidth int, aspectRatio float64, vFov float64) *camera {
 	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
 
 	center := makeVec3(0, 0, 0)
 
 	focalLength := 1.0
-	viewportHeight := 2.0
+	theta := degreesToRadians(vFov)
+	h := math.Tan(theta / 2.0)
+	viewportHeight := 2.0 * h * focalLength
 	viewportWidth := viewportHeight * (float64(imageWidth) / float64(imageHeight))
 
 	viewportU := makeVec3(viewportWidth, 0, 0)

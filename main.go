@@ -29,7 +29,7 @@ func renderScene(imageWidth int, aspectRatio float64) *render {
 	world.add(makeSphere(makeVec3(-1, 0, -1), -0.4, material_left))
 	world.add(makeSphere(makeVec3(1, 0, -1), 0.5, material_right))
 
-	camera := makeCamera(imageWidth, aspectRatio, 1000)
+	camera := makeCamera(imageWidth, aspectRatio, 90.0)
 
 	render := camera.render(world)
 
