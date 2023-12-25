@@ -6,7 +6,7 @@ import (
 )
 
 // TODO: consolidate all quality-related options
-const max_depth = 10 // maximum number of bounces
+const max_depth = 40 // maximum number of bounces
 
 type camera struct {
 	imageWidth  int

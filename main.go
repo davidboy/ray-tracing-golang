@@ -10,9 +10,9 @@ import (
 
 var threaded = true
 var renderAheadOfDisplay = false
-var threads = runtime.NumCPU()
+var threads = max(1, runtime.NumCPU()-2)
 
-const samples = 10000
+const samples = 500
 
 func renderScene(imageWidth int, aspectRatio float64) *render {
 
@@ -54,7 +54,7 @@ func renderScene(imageWidth int, aspectRatio float64) *render {
 	return render
 }
 
-const imageWidth = 320
+const imageWidth = 256
 const aspectRatio = 16.0 / 9.0
 
 func ppmMain() {
