@@ -6,9 +6,6 @@ import (
 	"sync"
 )
 
-// TODO: consolidate all quality-related options
-const max_depth = 40 // maximum number of bounces
-
 type cameraParameters struct {
 	imageWidth  int
 	imageHeight int

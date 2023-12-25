@@ -12,7 +12,10 @@ var threaded = true
 var renderAheadOfDisplay = false
 var threads = max(1, runtime.NumCPU()-2)
 
-const samples = 500
+// image quality settings
+
+const samples = 500  // number of samples per pixel
+const max_depth = 50 // maximum number of bounces
 
 func makeTripleSphereWorld() (hittable, cameraParameters) {
 
