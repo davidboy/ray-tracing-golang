@@ -24,10 +24,6 @@ var quality = qualityParameters{
 func renderScene() *render {
 	world, parameters := makeBook1CoverScene()
 
-	if !quality.dof {
-		parameters.defocusAngle = 0
-	}
-
 	camera := makeCamera(parameters, &quality)
 	render := camera.render(world)
 

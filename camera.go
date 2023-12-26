@@ -100,6 +100,10 @@ func makeCamera(parameters cameraParameters, q *qualityParameters) *camera {
 
 	aspectRatio := float64(imageWidth) / float64(imageHeight)
 
+	if !quality.dof {
+		parameters.defocusAngle = 0 // disable depth of field
+	}
+
 	center := parameters.lookFrom
 
 	theta := degreesToRadians(parameters.vFov)
