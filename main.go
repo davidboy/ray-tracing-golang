@@ -73,6 +73,14 @@ func main() {
 	}
 
 	if *outputPng != "" {
-		// TODO: implement PNG output
+		f, err := os.Create(*outputPng)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer f.Close()
+
+		writePng(render.c.imageWidth, render.c.imageHeight, imagePixels, f)
 	}
 }

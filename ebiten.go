@@ -47,5 +47,5 @@ func (v vec3) RGBA() (r, g, b, a uint32) {
 	ir := uint32(65534.999 * v.e[0])
 	ig := uint32(65534.999 * v.e[1])
 	ib := uint32(65534.999 * v.e[2])
-	return ir, ig, ib, 1
+	return ir, ig, ib, 0xffff
 }
