@@ -12,10 +12,23 @@ var threaded = true
 var renderAheadOfDisplay = false
 var threads = max(1, runtime.NumCPU()-2)
 
-// image quality settings
+var quality = qualityParameters{
+	imageWidth:  640,
+	imageHeight: 480,
 
-const samples = 500  // number of samples per pixel
-const max_depth = 50 // maximum number of bounces
+	samples:  500,
+	maxDepth: 50,
+	dof:      true,
+}
+
+type qualityParameters struct {
+	imageWidth, imageHeight int
+
+	samples  int
+	maxDepth int
+
+	dof bool
+}
 
 func makeTripleSphereWorld() (hittable, cameraParameters) {
 
@@ -33,9 +46,6 @@ func makeTripleSphereWorld() (hittable, cameraParameters) {
 	world.add(makeSphere(makeVec3(1, 0, -1), 0.5, material_right))
 
 	parameters := cameraParameters{
-		imageWidth:  640, // 256,
-		imageHeight: 480, // 144,
-
 		vFov:     30,
 		lookFrom: makeVec3(-2, 2, 1),
 		lookAt:   makeVec3(0, 0, -1),
@@ -80,9 +90,6 @@ func makeBook1CoverWorld() (hittable, cameraParameters) {
 	world.add(makeSphere(makeVec3(4, 1, 0), 1.0, metal{makeVec3(0.7, 0.6, 0.5), 0.0}))
 
 	parameters := cameraParameters{
-		imageWidth:  640, // 256,
-		imageHeight: 480, // 144,
-
 		vFov:     30,
 		lookFrom: makeVec3(13, 2, 3),
 		lookAt:   makeVec3(0, 0, 0),
@@ -96,26 +103,30 @@ func makeBook1CoverWorld() (hittable, cameraParameters) {
 }
 
 func renderScene() *render {
-
 	world, parameters := makeBook1CoverWorld()
-	camera := makeCamera(parameters)
+
+	if !quality.dof {
+		parameters.defocusAngle = 0
+	}
+
+	camera := makeCamera(parameters, &quality)
 	render := camera.render(world)
 
 	if threaded {
 
-		fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", camera.imageWidth, camera.imageHeight, samples, threads)
+		fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", camera.imageWidth, camera.imageHeight, quality.samples, threads)
 
 		for i := 0; i < threads; i++ {
-			go render.run(max(1, samples/threads), i)
+			go render.run(max(1, quality.samples/threads), i)
 		}
 	} else {
 
-		fmt.Printf("Rendering a %d x %d image with %d samples per pixel\n", camera.imageWidth, camera.imageHeight, samples)
+		fmt.Printf("Rendering a %d x %d image with %d samples per pixel\n", camera.imageWidth, camera.imageHeight, quality.samples)
 
 		if renderAheadOfDisplay {
-			render.run(samples, 0)
+			render.run(quality.samples, 0)
 		} else {
-			go render.run(samples, 0)
+			go render.run(quality.samples, 0)
 		}
 	}
 

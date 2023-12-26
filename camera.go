@@ -7,11 +7,6 @@ import (
 )
 
 type cameraParameters struct {
-	imageWidth  int
-	imageHeight int
-
-	// TODO: quality options here?
-
 	vFov     float64
 	lookFrom vec3
 	lookAt   vec3
@@ -22,6 +17,8 @@ type cameraParameters struct {
 }
 
 type camera struct {
+	q *qualityParameters
+
 	imageWidth  int
 	imageHeight int
 	aspectRatio float64
@@ -88,9 +85,9 @@ func (r *render) squash() []vec3 {
 	return result
 }
 
-func makeCamera(parameters cameraParameters) *camera {
-	imageWidth := parameters.imageWidth
-	imageHeight := parameters.imageHeight
+func makeCamera(parameters cameraParameters, q *qualityParameters) *camera {
+	imageWidth := q.imageWidth
+	imageHeight := q.imageHeight
 
 	aspectRatio := float64(imageWidth) / float64(imageHeight)
 
@@ -108,8 +105,8 @@ func makeCamera(parameters cameraParameters) *camera {
 	viewportU := u.multiplyScalar(viewportWidth)
 	viewportV := v.multiplyScalar(viewportHeight) // FIXME: negate v?
 
-	pixelDeltaU := viewportU.divideScalar(float64(parameters.imageWidth))
-	pixelDeltaV := viewportV.divideScalar(float64(parameters.imageHeight))
+	pixelDeltaU := viewportU.divideScalar(float64(imageWidth))
+	pixelDeltaV := viewportV.divideScalar(float64(imageHeight))
 
 	viewportUpperLeft := center.
 		subtract(w.multiplyScalar(parameters.focusDist)).
@@ -127,6 +124,8 @@ func makeCamera(parameters cameraParameters) *camera {
 	defocusDiskV := v.multiplyScalar(defocusRadius)
 
 	return &camera{
+		q: q,
+
 		imageWidth:  imageWidth,
 		imageHeight: imageHeight,
 		aspectRatio: aspectRatio,
@@ -153,7 +152,7 @@ func (r *render) run(samples int, id int) {
 				ray := r.c.getRay(x, y)
 
 				pixelIndex := getPixelIndex(x, y, r.c.imageWidth)
-				pixelColor := rayColor(ray, max_depth, r.w)
+				pixelColor := rayColor(ray, r.c.q.samples, r.w)
 
 				pixels[pixelIndex] = pixelColor
 			}
