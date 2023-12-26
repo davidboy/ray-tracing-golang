@@ -1,86 +1,78 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
+	"os"
 	"runtime"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var threaded = true
-var renderAheadOfDisplay = false
-var threads = max(1, runtime.NumCPU()-2)
-
 var quality = qualityParameters{
-	imageWidth:  640,
-	imageHeight: 480,
 
-	samples:  500,
-	maxDepth: 50,
+	// TODO: move to render parameters?
+	imageWidth:  150, // 640,
+	imageHeight: 150, // 480,
+
+	samples:  60,
+	maxDepth: 25,
 	dof:      true,
 }
 
-func renderScene() *render {
+func main() {
+	// TODO: move to render parameters
+	var threads = flag.Int("threads", max(1, runtime.NumCPU()-2), "number of render threads to use")
+
+	var outputPpm = flag.String("ppm", "", "output image as a PPM file")
+	var outputPng = flag.String("png", "", "output image as a PNG file")
+
+	var renderImage = flag.Bool("gui", true, "display the image as it is rendered")
+
+	flag.Parse()
+
 	world, parameters := makeBook1CoverScene()
+	render := createRender(world, parameters, *threads)
 
-	camera := makeCamera(parameters, &quality)
-	render := camera.render(world)
+	fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", render.c.imageWidth, render.c.imageHeight, quality.samples, *threads)
 
-	if threaded {
+	go func() {
+		<-render.finished
+		fmt.Println("Render complete.")
+	}()
 
-		fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", camera.imageWidth, camera.imageHeight, quality.samples, threads)
+	if *renderImage {
+		game := makeGame(render)
 
-		for i := 0; i < threads; i++ {
-			go render.run(max(1, quality.samples/threads), i)
-		}
-	} else {
+		ebiten.SetWindowSize(game.render.c.imageWidth, game.render.c.imageHeight)
+		ebiten.SetWindowTitle("Raytracer")
 
-		fmt.Printf("Rendering a %d x %d image with %d samples per pixel\n", camera.imageWidth, camera.imageHeight, quality.samples)
+		ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+		ebiten.MaximizeWindow()
 
-		if renderAheadOfDisplay {
-			render.run(quality.samples, 0)
-		} else {
-			go render.run(quality.samples, 0)
+		if err := ebiten.RunGame(game); err != nil {
+			log.Fatal(err)
 		}
 	}
 
-	return render
-}
-
-func ppmMain() {
-	render := renderScene()
-
-	// TODO: progress reporting
-
-	// func(percentageComplete float64) {
-	// 	fmt.Fprintf(os.Stderr, "\rPercentage complete: %.2f", percentageComplete*100)
-	// }
+	<-render.finished
 
 	imagePixels := render.squash()
 
-	writePpm(render.c.imageWidth, render.c.aspectRatio, imagePixels)
-}
+	if *outputPpm != "" {
+		f, err := os.Create(*outputPpm)
 
-func ebitenMain() {
-	render := renderScene()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	// TODO: progress reporting
+		defer f.Close()
 
-	game := makeGame(render)
-
-	ebiten.SetWindowSize(game.render.c.imageWidth, game.render.c.imageHeight)
-	ebiten.SetWindowTitle("Raytracer")
-
-	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	ebiten.MaximizeWindow()
-
-	if err := ebiten.RunGame(game); err != nil {
-		log.Fatal(err)
+		writePpm(render.c.imageWidth, render.c.imageHeight, imagePixels, f)
 	}
-}
 
-func main() {
-	// ppmMain()
-	ebitenMain()
+	if *outputPng != "" {
+		// TODO: implement PNG output
+	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"sync"
 )
@@ -50,8 +49,8 @@ type render struct {
 	samples int    // number of samples that have been taken
 	pixels  []vec3 // rendered pixels
 
-	finished bool // whether the render has finished
-	dirty    bool // whether the render has changed since the last squash
+	finished chan bool // whether the render has finished
+	dirty    bool      // whether the render has changed since the last squash
 
 	mu sync.Mutex
 }
@@ -60,6 +59,8 @@ func makeRender(c *camera, w hittable) *render {
 	return &render{
 		c: c,
 		w: w,
+
+		finished: make(chan bool),
 
 		pixels: make([]vec3, c.imageWidth*c.imageHeight),
 	}
@@ -155,7 +156,8 @@ func makeCamera(parameters cameraParameters, q *qualityParameters) *camera {
 
 }
 
-func (r *render) run(samples int, id int) {
+func (r *render) run(samples int, id int, finished chan bool) {
+
 	for sample := 0; sample < samples; sample++ {
 
 		pixels := make([]vec3, r.c.imageWidth*r.c.imageHeight)
@@ -174,7 +176,7 @@ func (r *render) run(samples int, id int) {
 		r.addSample(pixels)
 	}
 
-	fmt.Printf("Thread %d finished\n", id)
+	close(finished)
 }
 
 func (c *camera) render(world hittable) *render {

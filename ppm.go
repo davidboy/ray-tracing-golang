@@ -2,24 +2,23 @@ package main
 
 import (
 	"fmt"
+	"io"
 )
 
-func writePpm(imageWidth int, aspectRatio float64, imagePixels []vec3) {
-	imageHeight := calculateImageHeight(imageWidth, aspectRatio)
+func writePpm(imageWidth int, imageHeight int, imagePixels []vec3, w io.Writer) {
 
-	fmt.Printf("P3\n%d %d\n255\n", imageWidth, imageHeight)
+	fmt.Fprintf(w, "P3\n%d %d\n255\n", imageWidth, imageHeight)
 
 	for y := imageHeight - 1; y >= 0; y-- {
 		for x := 0; x < imageWidth; x++ {
 			index := getPixelIndex(x, y, imageWidth)
-			imagePixels[index].writeAsColor()
+			color := imagePixels[index]
+
+			ir := int(255.999 * color.e[0])
+			ig := int(255.999 * color.e[1])
+			ib := int(255.999 * color.e[2])
+
+			fmt.Fprintf(w, "%d %d %d\n", ir, ig, ib)
 		}
 	}
-}
-
-func (color vec3) writeAsColor() {
-	ir := int(255.999 * color.e[0])
-	ig := int(255.999 * color.e[1])
-	ib := int(255.999 * color.e[2])
-	fmt.Printf("%d %d %d\n", ir, ig, ib)
 }
