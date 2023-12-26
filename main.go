@@ -53,7 +53,7 @@ func makeBook1CoverWorld() (hittable, cameraParameters) {
 	world := makeHittableList()
 
 	// ground
-	world.add(makeSphere(makeVec3(0, -1000, 0), 1000, lambertian{makeVec3(0.8, 0.8, 0.0)}))
+	world.add(makeSphere(makeVec3(0, -1000, 0), 1000, lambertian{makeVec3(0.5, 0.5, 0.5)}))
 
 	for a := -11; a < 11; a++ {
 		for b := -11; b < 11; b++ {
