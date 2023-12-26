@@ -16,6 +16,15 @@ type cameraParameters struct {
 	focusDist    float64
 }
 
+type qualityParameters struct {
+	imageWidth, imageHeight int
+
+	samples  int
+	maxDepth int
+
+	dof bool
+}
+
 type camera struct {
 	q *qualityParameters
 
