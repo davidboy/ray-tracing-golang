@@ -19,6 +19,8 @@ var quality = qualityParameters{
 	samples:  80,
 	maxDepth: 25,
 	dof:      false,
+
+	// TODO: support locked time / no motion blur
 }
 
 func main() {
