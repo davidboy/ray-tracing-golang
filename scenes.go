@@ -60,7 +60,7 @@ func makeBook1CoverScene() (hittable, cameraParameters) {
 	world.add(makeSphere(makeVec3(4, 1, 0), 1.0, metal{makeVec3(0.7, 0.6, 0.5), 0.0}))
 
 	parameters := cameraParameters{
-		vFov:     30,
+		vFov:     20,
 		lookFrom: makeVec3(13, 2, 3),
 		lookAt:   makeVec3(0, 0, 0),
 		vUp:      makeVec3(0, 1, 0),
