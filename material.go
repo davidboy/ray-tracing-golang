@@ -18,7 +18,7 @@ func (l lambertian) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *r
 		scatterDirection = rec.normal
 	}
 
-	scatteredRay := makeRay(rec.p, scatterDirection)
+	scatteredRay := makeTimedRay(rec.p, scatterDirection, r.time)
 
 	return false, &scatteredRay, l.albedo
 }
@@ -30,7 +30,7 @@ type metal struct {
 
 func (m metal) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, attenuation vec3) {
 	reflected := r.direction.unitVector().reflect(rec.normal)
-	scatteredRay := makeRay(rec.p, reflected.add(randUnitVector().multiplyScalar(m.fuzz)))
+	scatteredRay := makeTimedRay(rec.p, reflected.add(randUnitVector().multiplyScalar(m.fuzz)), r.time)
 	absorbed = dot(scatteredRay.direction, rec.normal) <= 0
 
 	return absorbed, &scatteredRay, m.albedo
@@ -64,7 +64,7 @@ func (d dielectric) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *r
 		direction = unitDirection.refract(rec.normal, refractionRatio)
 	}
 
-	scatteredRay := makeRay(rec.p, direction)
+	scatteredRay := makeTimedRay(rec.p, direction, r.time)
 
 	return false, &scatteredRay, attenuation
 }

@@ -71,3 +71,53 @@ func makeBook1CoverScene() (hittable, cameraParameters) {
 
 	return world, parameters
 }
+
+func makeBook1CoverSceneWithMotion() (hittable, cameraParameters) {
+
+	world := makeHittableList()
+
+	// ground
+	world.add(makeSphere(makeVec3(0, -1000, 0), 1000, lambertian{makeVec3(0.5, 0.5, 0.5)}))
+
+	for a := -11; a < 11; a++ {
+		for b := -11; b < 11; b++ {
+			chooseMat := rand()
+			center := makeVec3(float64(a)+0.9*rand(), 0.2, float64(b)+0.9*rand())
+
+			if center.subtract(makeVec3(4, 0.2, 0)).length() > 0.9 {
+				if chooseMat < 0.8 {
+					// diffuse
+
+					albedo := randVec().multiply(randVec())
+					center2 := center.add(makeVec3(0, randb(0, 0.5), 0))
+
+					world.add(makeMovingSphere(center, center2, 0.2, lambertian{albedo}))
+
+				} else if chooseMat < 0.95 {
+					// metal
+					world.add(makeSphere(center, 0.2, metal{randVecB(0.5, 1), randb(0, 0.5)}))
+
+				} else {
+					// glass
+					world.add(makeSphere(center, 0.2, dielectric{1.5}))
+				}
+			}
+		}
+	}
+
+	world.add(makeSphere(makeVec3(0, 1, 0), 1.0, dielectric{1.5}))
+	world.add(makeSphere(makeVec3(-4, 1, 0), 1.0, lambertian{makeVec3(0.4, 0.2, 0.1)}))
+	world.add(makeSphere(makeVec3(4, 1, 0), 1.0, metal{makeVec3(0.7, 0.6, 0.5), 0.0}))
+
+	parameters := cameraParameters{
+		vFov:     30,
+		lookFrom: makeVec3(13, 2, 3),
+		lookAt:   makeVec3(0, 0, 0),
+		vUp:      makeVec3(0, 1, 0),
+
+		defocusAngle: 0.02,
+		focusDist:    10.0,
+	}
+
+	return world, parameters
+}

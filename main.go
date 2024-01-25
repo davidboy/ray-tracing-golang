@@ -33,6 +33,7 @@ func main() {
 	flag.Parse()
 
 	world, parameters := makeBook1CoverScene()
+	world, parameters := makeBook1CoverSceneWithMotion()
 	render := createRender(world, parameters, *threads)
 
 	fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", render.c.imageWidth, render.c.imageHeight, quality.samples, *threads)

@@ -202,8 +202,9 @@ func (c *camera) getRay(x, y int) ray {
 	}
 
 	rayDirection := pixelSample.subtract(rayOrigin)
+	rayTime := rand()
 
-	return makeRay(rayOrigin, rayDirection)
+	return makeTimedRay(rayOrigin, rayDirection, rayTime)
 }
 
 func (c *camera) pixelSampleSquare() vec3 {
