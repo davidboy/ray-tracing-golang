@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -35,14 +36,24 @@ func main() {
 	flag.Parse()
 
 	world, parameters := makeBook1CoverScene()
-	world, parameters := makeBook1CoverSceneWithMotion()
+
+	startedAt := time.Now()
 	render := createRender(world, parameters, *threads)
 
 	fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", render.c.imageWidth, render.c.imageHeight, quality.samples, *threads)
 
 	go func() {
 		<-render.finished
+
+		finishedAt := time.Now()
+
 		fmt.Println("Render complete.")
+
+		elapsed := finishedAt.Sub(startedAt)
+		samplesTaken := render.samples * render.c.imageWidth * render.c.imageHeight
+
+		fmt.Printf("Rendered %d samples in %s (%.2f samples per second)\n", samplesTaken, elapsed, float64(samplesTaken)/elapsed.Seconds())
+
 	}()
 
 	if *renderImage {
