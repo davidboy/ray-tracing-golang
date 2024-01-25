@@ -13,12 +13,12 @@ import (
 var quality = qualityParameters{
 
 	// TODO: move to render parameters?
-	imageWidth:  150, // 640,
-	imageHeight: 150, // 480,
+	imageWidth:  150 * 21 / 9, // 640,
+	imageHeight: 150,          // 480,
 
-	samples:  60,
+	samples:  80,
 	maxDepth: 25,
-	dof:      true,
+	dof:      false,
 }
 
 func main() {
