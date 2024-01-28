@@ -10,6 +10,15 @@ func makeInterval(min, max float64) interval {
 	return interval{min, max}
 }
 
+func (i interval) size() float64 {
+	return i.max - i.min
+}
+
+func (i interval) expand(delta float64) interval {
+	padding := delta / 2
+	return makeInterval(i.min-padding, i.max+padding)
+}
+
 func (i interval) contains(x float64) bool {
 	return i.min <= x && x <= i.max
 }

@@ -5,17 +5,25 @@ import "math"
 type sphere struct {
 	center    vec3 // the position of this sphere; if moving, this is the initial position
 	centerVec vec3 // if this sphere is moving, the vector from `center` to the final position
-
-	radius float64
-	mat    material
+	radius    float64
+	mat       material
+	bbox      aabb
 }
 
 func makeSphere(center vec3, radius float64, mat material) sphere {
-	return sphere{center, makeVec3(0, 0, 0), radius, mat}
+	rvec := makeVec3(radius, radius, radius)
+	bbox := makeAABBFromExtremaPoints(center.subtract(rvec), center.add(rvec))
+
+	return sphere{center, makeVec3(0, 0, 0), radius, mat, bbox}
 }
 
 func makeMovingSphere(center1, center2 vec3, radius float64, mat material) sphere {
-	return sphere{center1, center2.subtract(center1), radius, mat}
+	rvec := makeVec3(radius, radius, radius)
+	box1 := makeAABBFromExtremaPoints(center1.subtract(rvec), center1.add(rvec))
+	box2 := makeAABBFromExtremaPoints(center2.subtract(rvec), center2.add(rvec))
+	bbox := makeAABBFromBoxes(box1, box2)
+
+	return sphere{center1, center2.subtract(center1), radius, mat, bbox}
 }
 
 func (s sphere) isMoving() bool {
@@ -61,4 +69,8 @@ func (s sphere) hit(r ray, t interval, rec *hitRecord) bool {
 	rec.mat = s.mat
 
 	return true
+}
+
+func (s sphere) boundingBox() aabb {
+	return s.bbox
 }

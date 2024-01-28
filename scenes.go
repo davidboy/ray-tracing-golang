@@ -1,6 +1,6 @@
 package main
 
-func makeTripleSphereScene() (hittable, cameraParameters) {
+func makeTripleSphereScene() (*hittableList, cameraParameters) {
 
 	material_ground := lambertian{makeVec3(0.8, 0.8, 0.0)}
 
@@ -25,10 +25,10 @@ func makeTripleSphereScene() (hittable, cameraParameters) {
 		focusDist:    3.4,
 	}
 
-	return world, parameters
+	return &world, parameters
 }
 
-func makeBook1CoverScene() (hittable, cameraParameters) {
+func makeBook1CoverScene() (*hittableList, cameraParameters) {
 
 	world := makeHittableList()
 
@@ -69,10 +69,10 @@ func makeBook1CoverScene() (hittable, cameraParameters) {
 		focusDist:    10.0,
 	}
 
-	return world, parameters
+	return &world, parameters
 }
 
-func makeBook1CoverSceneWithMotion() (hittable, cameraParameters) {
+func makeBook1CoverSceneWithMotion() (*hittableList, cameraParameters) {
 
 	world := makeHittableList()
 
@@ -119,5 +119,5 @@ func makeBook1CoverSceneWithMotion() (hittable, cameraParameters) {
 		focusDist:    10.0,
 	}
 
-	return world, parameters
+	return &world, parameters
 }

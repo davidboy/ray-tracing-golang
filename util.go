@@ -30,6 +30,14 @@ func randb(min, max float64) float64 {
 	return min + (max-min)*rand()
 }
 
+func randInt() int {
+	return r.Int()
+}
+
+func randIntB(min, max int) int {
+	return min + r.Intn(max-min)
+}
+
 func linearToGamma(linear float64) float64 {
 	return math.Sqrt(linear)
 }

@@ -2,10 +2,11 @@ package main
 
 type hittableList struct {
 	hittables []hittable
+	bbox      aabb
 }
 
 func makeHittableList() hittableList {
-	return hittableList{make([]hittable, 0)}
+	return hittableList{make([]hittable, 0), makeEmptyAABB()}
 }
 
 func (l *hittableList) clear() {
@@ -14,6 +15,7 @@ func (l *hittableList) clear() {
 
 func (l *hittableList) add(h hittable) {
 	l.hittables = append(l.hittables, h)
+	l.bbox = makeAABBFromBoxes(l.bbox, h.boundingBox())
 }
 
 func (l hittableList) hit(r ray, t interval, rec *hitRecord) bool {
@@ -29,4 +31,8 @@ func (l hittableList) hit(r ray, t interval, rec *hitRecord) bool {
 	}
 
 	return hitAnything
+}
+
+func (l hittableList) boundingBox() aabb {
+	return l.bbox
 }
