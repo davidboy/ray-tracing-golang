@@ -38,7 +38,7 @@ func main() {
 	world, parameters := makeBook1CoverScene()
 
 	startedAt := time.Now()
-	render := createRender(world, parameters, *threads)
+	render := startRendering(world, parameters, *threads)
 
 	fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", render.c.imageWidth, render.c.imageHeight, quality.samples, *threads)
 
@@ -97,4 +97,29 @@ func main() {
 
 		writePng(render.c.imageWidth, render.c.imageHeight, imagePixels, f)
 	}
+}
+
+func startRendering(world hittable, parameters cameraParameters, threads int) *render {
+
+	camera := makeCamera(parameters, &quality)
+	render := makeRender(camera, world)
+
+	tasks := make([](chan bool), threads)
+
+	for i := 0; i < threads; i++ {
+		taskFinished := make(chan bool)
+		tasks[i] = taskFinished
+
+		go render.run(max(1, quality.samples/threads), i, taskFinished)
+	}
+
+	go func() {
+		for _, taskFinished := range tasks {
+			<-taskFinished
+		}
+
+		close(render.finished)
+	}()
+
+	return render
 }
