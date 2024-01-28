@@ -60,6 +60,8 @@ func main() {
 	if *renderImage {
 		game := makeGame(render)
 
+		ebiten.SetTPS(15)
+
 		ebiten.SetWindowSize(game.render.c.imageWidth, game.render.c.imageHeight)
 		ebiten.SetWindowTitle("Raytracer")
 
