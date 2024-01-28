@@ -117,6 +117,21 @@ func startRendering(world hittable, parameters cameraParameters, threads int) *r
 	var currentPixelIndex int
 	finalPixelIndex := getPixelIndex(camera.imageWidth, camera.imageHeight-1, camera.imageWidth)
 
+	////////////////
+
+	// go (func() {
+	// 	desiredRandomPixels := camera.imageWidth * camera.imageHeight / 2
+
+	// 	for randomPixelsGenerated := 0; randomPixelsGenerated < desiredRandomPixels; randomPixelsGenerated++ {
+	// 		randomIndex := int(randb(0, float64(finalPixelIndex)))
+	// 		x, y := getPixelCoordinates(randomIndex, camera.imageWidth)
+
+	// 		render.runSinglePixel(int(x), int(y), 1)
+	// 	}
+	// })()
+
+	////////////////
+
 	for i := 0; i < threads; i++ {
 		taskFinished := make(chan bool)
 		tasks[i] = taskFinished
