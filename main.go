@@ -31,7 +31,7 @@ func main() {
 	var outputPpm = flag.String("ppm", "", "output image as a PPM file")
 	var outputPng = flag.String("png", "", "output image as a PNG file")
 
-	var renderImage = flag.Bool("gui", true, "display the image as it is rendered")
+	var renderImage = flag.Bool("gui", false, "display the image as it is rendered")
 
 	flag.Parse()
 
