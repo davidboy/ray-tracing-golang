@@ -6,7 +6,7 @@ type render struct {
 	c *camera
 	w hittable
 
-	samples int    // number of samples that have been taken
+	samples []int  // number of samples that have been taken for rendered pixels
 	pixels  []vec3 // rendered pixels
 
 	finished chan bool // whether the render has finished
@@ -22,11 +22,12 @@ func makeRender(c *camera, w hittable) *render {
 
 		finished: make(chan bool),
 
-		pixels: make([]vec3, c.imageWidth*c.imageHeight),
+		samples: make([]int, c.imageWidth*c.imageHeight),
+		pixels:  make([]vec3, c.imageWidth*c.imageHeight),
 	}
 }
 
-func (r *render) run(samples int, id int, finished chan bool) {
+func (r *render) runWholeImage(samples int, finished chan bool) {
 
 	for sample := 0; sample < samples; sample++ {
 
@@ -43,22 +44,52 @@ func (r *render) run(samples int, id int, finished chan bool) {
 			}
 		}
 
-		r.addSample(pixels)
+		r.addWholeImageSample(pixels)
 	}
 
 	close(finished)
 }
 
-func (r *render) addSample(pixels []vec3) {
+func (r *render) runSinglePixel(x, y, samples int) {
+
+	pixel := makeVec3(0, 0, 0)
+	pixelIndex := getPixelIndex(x, y, r.c.imageWidth)
+
+	for i := 0; i < samples; i++ {
+		pixel.addMut(rayColor(r.c.getRay(x, y), r.c.q.samples, r.w))
+	}
+
+	r.addSinglePixelSample(pixel, samples, pixelIndex)
+}
+
+func (r *render) addSinglePixelSample(pixel vec3, samples int, index int) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.samples[index] = r.samples[index] + samples
+	r.pixels[index].addMut(pixel)
+
+	r.dirty = true
+}
+
+func (r *render) addWholeImageSample(pixels []vec3) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	for i, pixel := range pixels {
+		r.samples[i]++
 		r.pixels[i].addMut(pixel)
 	}
 
-	r.samples++
 	r.dirty = true
+}
+
+func (r *render) getTotalSamplesTaken() (result int) {
+	for _, samples := range r.samples {
+		result += samples
+	}
+
+	return result
 }
 
 func (r *render) squash() []vec3 {
@@ -68,7 +99,7 @@ func (r *render) squash() []vec3 {
 	result := make([]vec3, len(r.pixels))
 
 	for i, pixel := range r.pixels {
-		result[i] = pixel.divideScalar(float64(r.samples)).clamp(pixelIntensity).toGammaSpace()
+		result[i] = pixel.divideScalar(float64(r.samples[i])).clamp(pixelIntensity).toGammaSpace()
 	}
 
 	r.dirty = false

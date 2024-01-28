@@ -15,6 +15,13 @@ func getPixelIndex(x, y, imageWidth int) int {
 	return y*imageWidth + x
 }
 
+func getPixelCoordinates(pixelIndex int, imageWidth int) (x, y int) {
+	x = pixelIndex % imageWidth
+	y = pixelIndex / imageWidth
+
+	return x, y
+}
+
 func rand() float64 {
 	return r.Float64()
 }
