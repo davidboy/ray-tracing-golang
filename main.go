@@ -12,15 +12,17 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const USE_BHV = true
+
 var quality = qualityParameters{
 
 	// TODO: move to render parameters?
-	imageWidth:  150 * 21 / 9, // 640,
-	imageHeight: 150,          // 480,
+	imageWidth:  640, //  150 * 21 / 9, // 640,
+	imageHeight: 480, // 150,          // 480,
 
-	samples:  80,
+	samples:  512,
 	maxDepth: 25,
-	dof:      false,
+	dof:      true,
 
 	// TODO: support locked time / no motion blur
 }
@@ -38,8 +40,16 @@ func main() {
 
 	world, parameters := makeBook1CoverScene()
 
+	var mainHittable hittable
+
+	if USE_BHV {
+		mainHittable = makeBvhNodeFromList(world)
+	} else {
+		mainHittable = world
+	}
+
 	startedAt := time.Now()
-	render := startRendering(world, parameters, *threads)
+	render := startRendering(mainHittable, parameters, *threads)
 
 	fmt.Printf("Rendering a %d x %d image with %d samples per pixel, using %d threads\n", render.c.imageWidth, render.c.imageHeight, quality.samples, *threads)
 
@@ -102,7 +112,7 @@ func main() {
 	}
 }
 
-const PIXELS_PER_CHUNK = 100
+const PIXELS_PER_CHUNK = 128
 
 func startRendering(world hittable, parameters cameraParameters, threads int) *render {
 
@@ -119,16 +129,16 @@ func startRendering(world hittable, parameters cameraParameters, threads int) *r
 
 	////////////////
 
-	// go (func() {
-	// 	desiredRandomPixels := camera.imageWidth * camera.imageHeight / 2
+	go (func() {
+		desiredRandomPixels := camera.imageWidth * camera.imageHeight * 2
 
-	// 	for randomPixelsGenerated := 0; randomPixelsGenerated < desiredRandomPixels; randomPixelsGenerated++ {
-	// 		randomIndex := int(randb(0, float64(finalPixelIndex)))
-	// 		x, y := getPixelCoordinates(randomIndex, camera.imageWidth)
+		for randomPixelsGenerated := 0; randomPixelsGenerated < desiredRandomPixels; randomPixelsGenerated++ {
+			randomIndex := int(randb(0, float64(finalPixelIndex)))
+			x, y := getPixelCoordinates(randomIndex, camera.imageWidth)
 
-	// 		render.runSinglePixel(int(x), int(y), 1)
-	// 	}
-	// })()
+			render.runSinglePixel(int(x), int(y), 1)
+		}
+	})()
 
 	////////////////
 
