@@ -5,6 +5,7 @@ type hitRecord struct {
 	normal    vec3
 	mat       material
 	t         float64
+	u, v      float64
 	frontFace bool
 }
 

@@ -7,7 +7,7 @@ type material interface {
 }
 
 type lambertian struct {
-	albedo vec3
+	albedo texture
 }
 
 func (l lambertian) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, attenuation vec3) {
@@ -19,8 +19,9 @@ func (l lambertian) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *r
 	}
 
 	scatteredRay := makeTimedRay(rec.p, scatterDirection, r.time)
+	attenuation = l.albedo.value(rec.u, rec.v, rec.p)
 
-	return false, &scatteredRay, l.albedo
+	return false, &scatteredRay, attenuation
 }
 
 type metal struct {

@@ -194,3 +194,7 @@ func (a vec3) nearZero() bool {
 func (a vec3) unitVector() vec3 {
 	return a.divideScalar(a.length())
 }
+
+func (a vec3) value(u, v float64, p vec3) vec3 {
+	return a
+}
