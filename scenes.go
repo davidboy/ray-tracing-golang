@@ -167,3 +167,25 @@ func makeBook1CoverSceneWithCheckerTexture() (*hittableList, cameraParameters) {
 
 	return &world, parameters
 }
+
+func makeTwoSpheresScene() (*hittableList, cameraParameters) {
+
+	world := makeHittableList()
+
+	checker := makeCheckerTexture(0.8, makeColorTexture(0.2, 0.3, 0.1), makeColorTexture(0.9, 0.9, 0.9))
+
+	world.add(makeSphere(makeVec3(0, -10, 0), 10, lambertian{checker}))
+	world.add(makeSphere(makeVec3(0, 10, 0), 10, lambertian{checker}))
+
+	parameters := cameraParameters{
+		vFov:     30,
+		lookFrom: makeVec3(13, 2, 3),
+		lookAt:   makeVec3(0, 0, 0),
+		vUp:      makeVec3(0, 1, 0),
+
+		defocusAngle: 0.6,
+		focusDist:    10.0,
+	}
+
+	return &world, parameters
+}

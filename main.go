@@ -17,11 +17,11 @@ const USE_BHV = true
 var quality = qualityParameters{
 
 	// TODO: move to render parameters?
-	imageWidth:  320, //  150 * 21 / 9, // 640,
-	imageHeight: 240, // 150,          // 480,
+	imageWidth:  400,          //  150 * 21 / 9, // 640,
+	imageHeight: 400 / 16 * 9, // 150,          // 480,
 
-	samples:  48 * 2 * 2 * 2,
-	maxDepth: 25,
+	samples:  256 * 2 * 2 * 2 * 2,
+	maxDepth: 50,
 	dof:      false,
 
 	// TODO: support locked time / no motion blur
@@ -38,7 +38,7 @@ func main() {
 
 	flag.Parse()
 
-	world, parameters := makeBook1CoverSceneWithCheckerTexture()
+	world, parameters := makeTwoSpheresScene()
 
 	var mainHittable hittable
 
