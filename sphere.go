@@ -66,6 +66,7 @@ func (s sphere) hit(r ray, t interval, rec *hitRecord) bool {
 
 	outwardNormal := rec.p.subtract(s.center).divideScalar(s.radius)
 	rec.setFaceNormal(r, outwardNormal)
+	rec.u, rec.v = outwardNormal.getSphereUv()
 	rec.mat = s.mat
 
 	return true
@@ -73,4 +74,14 @@ func (s sphere) hit(r ray, t interval, rec *hitRecord) bool {
 
 func (s sphere) boundingBox() aabb {
 	return s.bbox
+}
+
+func (p vec3) getSphereUv() (u, v float64) {
+	theta := math.Acos(-p.y())
+	phi := math.Atan2(-p.z(), p.x()) + math.Pi
+
+	u = phi / (2 * math.Pi)
+	v = theta / math.Pi
+
+	return u, v
 }

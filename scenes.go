@@ -178,12 +178,12 @@ func makeTwoSpheresScene() (*hittableList, cameraParameters) {
 	world.add(makeSphere(makeVec3(0, 10, 0), 10, lambertian{checker}))
 
 	parameters := cameraParameters{
-		vFov:     30,
+		vFov:     35,
 		lookFrom: makeVec3(13, 2, 3),
 		lookAt:   makeVec3(0, 0, 0),
 		vUp:      makeVec3(0, 1, 0),
 
-		defocusAngle: 0.6,
+		defocusAngle: 0.0,
 		focusDist:    10.0,
 	}
 
