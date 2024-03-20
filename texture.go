@@ -40,3 +40,15 @@ func (c checkerTexture) value(u, v float64, p vec3) vec3 {
 		return c.odd.value(u, v, p)
 	}
 }
+
+func makeNoiseTexture() noiseTexture {
+	return noiseTexture{makePerlin()}
+}
+
+type noiseTexture struct {
+	noise perlin
+}
+
+func (n noiseTexture) value(u, v float64, p vec3) vec3 {
+	return makeVec3(1, 1, 1).multiplyScalar(n.noise.noise(p))
+}

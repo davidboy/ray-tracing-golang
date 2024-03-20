@@ -189,3 +189,24 @@ func makeTwoSpheresScene() (*hittableList, cameraParameters) {
 
 	return &world, parameters
 }
+
+func makeTwoPerlinSpheresScene() (*hittableList, cameraParameters) {
+
+	world := makeHittableList()
+
+	pertext := makeNoiseTexture()
+	world.add(makeSphere(makeVec3(0, -1000, 0), 1000, lambertian{pertext}))
+	world.add(makeSphere(makeVec3(0, 2, 0), 2, lambertian{pertext}))
+
+	parameters := cameraParameters{
+		vFov:     20,
+		lookFrom: makeVec3(13, 2, 3),
+		lookAt:   makeVec3(0, 0, 0),
+		vUp:      makeVec3(0, 1, 0),
+
+		defocusAngle: 0.0,
+		focusDist:    10.0,
+	}
+
+	return &world, parameters
+}

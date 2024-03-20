@@ -38,7 +38,7 @@ func main() {
 
 	flag.Parse()
 
-	world, parameters := makeTwoSpheresScene()
+	world, parameters := makeTwoPerlinSpheresScene()
 
 	var mainHittable hittable
 
