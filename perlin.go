@@ -27,6 +27,10 @@ func (per *perlin) noise(p vec3) float64 {
 	v := p.y() - math.Floor(p.y())
 	w := p.z() - math.Floor(p.z())
 
+	u = u * u * (3 - 2*u)
+	v = v * v * (3 - 2*v)
+	w = w * w * (3 - 2*w)
+
 	i := int(math.Floor(p.x()))
 	j := int(math.Floor(p.y()))
 	k := int(math.Floor(p.z()))
