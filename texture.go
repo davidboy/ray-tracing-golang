@@ -51,5 +51,5 @@ type noiseTexture struct {
 }
 
 func (n noiseTexture) value(u, v float64, p vec3) vec3 {
-	return makeVec3(1, 1, 1).multiplyScalar(n.noise.noise(p.multiplyScalar(n.scale)))
+	return makeVec3(1, 1, 1).multiplyScalar(0.5).multiplyScalar(1.0 + n.noise.noise(p.multiplyScalar(n.scale)))
 }
