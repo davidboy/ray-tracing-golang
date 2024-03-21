@@ -194,7 +194,7 @@ func makeTwoPerlinSpheresScene() (*hittableList, cameraParameters) {
 
 	world := makeHittableList()
 
-	pertext := makeNoiseTexture()
+	pertext := makeNoiseTexture(4)
 	world.add(makeSphere(makeVec3(0, -1000, 0), 1000, lambertian{pertext}))
 	world.add(makeSphere(makeVec3(0, 2, 0), 2, lambertian{pertext}))
 
