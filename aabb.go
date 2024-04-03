@@ -31,6 +31,29 @@ func makeAABBFromBoxes(box1, box2 aabb) aabb {
 	)
 }
 
+func (box aabb) pad() aabb {
+	delta := 0.0001
+
+	newX := box.x
+	newY := box.y
+	newZ := box.z
+
+	if box.x.size() < delta {
+		newX = newX.expand(delta)
+	}
+
+	if box.y.size() < delta {
+		newY = newY.expand(delta)
+	}
+
+	if box.z.size() < delta {
+		newZ = newZ.expand(delta)
+	}
+
+	return makeAABB(newX, newY, newZ)
+
+}
+
 func (a aabb) axis(n int) interval {
 	if n == 1 {
 		return a.y

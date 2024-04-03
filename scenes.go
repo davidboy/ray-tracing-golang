@@ -210,3 +210,31 @@ func makeTwoPerlinSpheresScene() (*hittableList, cameraParameters) {
 
 	return &world, parameters
 }
+
+func makeSimpleQuadsScene() (*hittableList, cameraParameters) {
+	world := makeHittableList()
+
+	leftRed := lambertian{makeColorTexture(1.0, 0.2, 0.2)}
+	backGreen := lambertian{makeColorTexture(0.2, 1.0, 0.2)}
+	rightBlue := lambertian{makeColorTexture(0.2, 0.2, 1.0)}
+	upperOrange := lambertian{makeColorTexture(1.0, 0.5, 0.0)}
+	lowerTeal := lambertian{makeColorTexture(0.2, 0.8, 0.8)}
+
+	world.add(makeQuad(makeVec3(-3, -2, 5), makeVec3(0, 0, -4), makeVec3(0, 4, 0), leftRed))
+	world.add(makeQuad(makeVec3(-2, -2, 0), makeVec3(4, 0, 0), makeVec3(0, 4, 0), backGreen))
+	world.add(makeQuad(makeVec3(3, -2, 1), makeVec3(0, 0, 4), makeVec3(0, 4, 0), rightBlue))
+	world.add(makeQuad(makeVec3(-2, 3, 1), makeVec3(4, 0, 0), makeVec3(0, 0, 4), upperOrange))
+	world.add(makeQuad(makeVec3(-2, -3, 5), makeVec3(4, 0, 0), makeVec3(0, 0, -4), lowerTeal))
+
+	parameters := cameraParameters{
+		vFov:     80,
+		lookFrom: makeVec3(0, 0, 9),
+		lookAt:   makeVec3(0, 0, 0),
+		vUp:      makeVec3(0, 1, 0),
+
+		defocusAngle: 0.0,
+		focusDist:    10.0,
+	}
+
+	return &world, parameters
+}
