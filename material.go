@@ -4,6 +4,7 @@ import "math"
 
 type material interface {
 	scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, attenuation vec3)
+	emitted(u, v float64, p vec3) vec3
 }
 
 type lambertian struct {
@@ -24,6 +25,10 @@ func (l lambertian) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *r
 	return false, &scatteredRay, attenuation
 }
 
+func (l lambertian) emitted(u, v float64, p vec3) vec3 {
+	return makeVec3(0, 0, 0)
+}
+
 type metal struct {
 	albedo vec3
 	fuzz   float64
@@ -35,6 +40,10 @@ func (m metal) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, a
 	absorbed = dot(scatteredRay.direction, rec.normal) <= 0
 
 	return absorbed, &scatteredRay, m.albedo
+}
+
+func (m metal) emitted(u, v float64, p vec3) vec3 {
+	return makeVec3(0, 0, 0)
 }
 
 type dielectric struct {
@@ -75,4 +84,20 @@ func reflectance(cosine, refIdx float64) float64 {
 	r0 := (1 - refIdx) / (1 + refIdx)
 	r0 = r0 * r0
 	return r0 + (1-r0)*math.Pow((1-cosine), 5)
+}
+
+func (d dielectric) emitted(u, v float64, p vec3) vec3 {
+	return makeVec3(0, 0, 0)
+}
+
+type diffuseLight struct {
+	emit texture
+}
+
+func (d diffuseLight) scatter(r *ray, rec *hitRecord) (absorbed bool, scattered *ray, attenuation vec3) {
+	return true, nil, makeVec3(0, 0, 0)
+}
+
+func (d diffuseLight) emitted(u, v float64, p vec3) vec3 {
+	return d.emit.value(u, v, p)
 }

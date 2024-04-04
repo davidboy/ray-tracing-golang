@@ -23,6 +23,8 @@ func makeTripleSphereScene() (*hittableList, cameraParameters) {
 
 		defocusAngle: 10,
 		focusDist:    3.4,
+
+		backgroundColor: makeVec3(0.7, 0.8, 1.0),
 	}
 
 	return &world, parameters
@@ -67,6 +69,8 @@ func makeBook1CoverScene() (*hittableList, cameraParameters) {
 
 		defocusAngle: 0.6,
 		focusDist:    10.0,
+
+		backgroundColor: makeVec3(0.7, 0.8, 1.0),
 	}
 
 	return &world, parameters
@@ -117,6 +121,8 @@ func makeBook1CoverSceneWithMotion() (*hittableList, cameraParameters) {
 
 		defocusAngle: 0.02,
 		focusDist:    10.0,
+
+		backgroundColor: makeVec3(0.7, 0.8, 1.0),
 	}
 
 	return &world, parameters
@@ -163,6 +169,8 @@ func makeBook1CoverSceneWithCheckerTexture() (*hittableList, cameraParameters) {
 
 		defocusAngle: 0.6,
 		focusDist:    10.0,
+
+		backgroundColor: makeVec3(0.7, 0.8, 1.0),
 	}
 
 	return &world, parameters
@@ -185,6 +193,8 @@ func makeTwoSpheresScene() (*hittableList, cameraParameters) {
 
 		defocusAngle: 0.0,
 		focusDist:    10.0,
+
+		backgroundColor: makeVec3(0.7, 0.8, 1.0),
 	}
 
 	return &world, parameters
@@ -206,6 +216,8 @@ func makeTwoPerlinSpheresScene() (*hittableList, cameraParameters) {
 
 		defocusAngle: 0.0,
 		focusDist:    10.0,
+
+		backgroundColor: makeVec3(0.7, 0.8, 1.0),
 	}
 
 	return &world, parameters
@@ -234,7 +246,90 @@ func makeSimpleQuadsScene() (*hittableList, cameraParameters) {
 
 		defocusAngle: 0.0,
 		focusDist:    10.0,
+
+		backgroundColor: makeVec3(0.7, 0.8, 1.0),
 	}
 
 	return &world, parameters
+}
+
+func makeSimpleLightScene() (*hittableList, cameraParameters) {
+	world := makeHittableList()
+
+	pertext := makeNoiseTexture(4)
+	world.add(makeSphere(makeVec3(0, -1000, 0), 1000, lambertian{pertext}))
+	world.add(makeSphere(makeVec3(0, 2, 0), 2, lambertian{pertext}))
+
+	difflight := diffuseLight{makeColorTexture(4, 4, 4)}
+	world.add(makeSphere(makeVec3(0, 7, 0), 2, difflight))
+	world.add(makeQuad(makeVec3(3, 1, -2), makeVec3(2, 0, 0), makeVec3(0, 2, 0), difflight))
+
+	parameters := cameraParameters{
+		vFov:     20,
+		lookFrom: makeVec3(26, 3, 6),
+		lookAt:   makeVec3(0, 2, 0),
+		vUp:      makeVec3(0, 1, 0),
+
+		defocusAngle: 0.0,
+		focusDist:    10.0,
+
+		backgroundColor: makeVec3(0, 0, 0),
+	}
+
+	return &world, parameters
+}
+
+func makeCornellBoxScene() (*hittableList, cameraParameters) {
+	world := makeHittableList()
+
+	red := lambertian{makeColorTexture(0.65, 0.05, 0.05)}
+	white := lambertian{makeColorTexture(0.73, 0.73, 0.73)}
+	green := lambertian{makeColorTexture(0.12, 0.45, 0.15)}
+	light := diffuseLight{makeColorTexture(15, 15, 15)}
+
+	world.add(makeQuad(makeVec3(555, 0, 0), makeVec3(0, 555, 0), makeVec3(0, 0, 555), green))
+	world.add(makeQuad(makeVec3(0, 0, 0), makeVec3(0, 555, 0), makeVec3(0, 0, 555), red))
+	world.add(makeQuad(makeVec3(343, 554, 332), makeVec3(0-130, 0, 0), makeVec3(0, 0, -105), light))
+	world.add(makeQuad(makeVec3(0, 0, 0), makeVec3(555, 0, 0), makeVec3(0, 0, 555), white))
+	world.add(makeQuad(makeVec3(555, 555, 555), makeVec3(-555, 0, 0), makeVec3(0, 0, -555), white))
+	world.add(makeQuad(makeVec3(0, 0, 555), makeVec3(555, 0, 0), makeVec3(0, 555, 0), white))
+
+	world.add(makeBox(makeVec3(130, 0, 65), makeVec3(295, 165, 230), white))
+	world.add(makeBox(makeVec3(265, 0, 295), makeVec3(430, 330, 460), white))
+
+	parameters := cameraParameters{
+		vFov:     40,
+		lookFrom: makeVec3(278, 278, -800),
+		lookAt:   makeVec3(278, 278, 0),
+		vUp:      makeVec3(0, 1, 0),
+
+		defocusAngle: 0.0,
+		focusDist:    10.0,
+
+		backgroundColor: makeVec3(0, 0, 0),
+	}
+
+	return &world, parameters
+}
+
+func makeBox(a, b vec3, mat material) hittableList {
+	sides := makeHittableList()
+
+	// TODO: access elements instead of using methods
+
+	min := makeVec3(min(a.x(), b.x()), min(a.y(), b.y()), min(a.z(), b.z()))
+	max := makeVec3(max(a.x(), b.x()), max(a.y(), b.y()), max(a.z(), b.z()))
+
+	dx := makeVec3(max.x()-min.x(), 0, 0)
+	dy := makeVec3(0, max.y()-min.y(), 0)
+	dz := makeVec3(0, 0, max.z()-min.z())
+
+	sides.add(makeQuad(makeVec3(min.x(), min.y(), max.z()), dx, dy, mat))          // front
+	sides.add(makeQuad(makeVec3(max.x(), min.y(), max.z()), dz.negate(), dy, mat)) // right
+	sides.add(makeQuad(makeVec3(max.x(), min.y(), min.z()), dx.negate(), dy, mat)) // back
+	sides.add(makeQuad(makeVec3(min.x(), min.y(), min.z()), dz, dy, mat))          // left
+	sides.add(makeQuad(makeVec3(min.x(), max.y(), max.z()), dx, dz.negate(), mat)) // top
+	sides.add(makeQuad(makeVec3(min.x(), min.y(), min.z()), dx, dz, mat))          // bottom
+
+	return sides
 }

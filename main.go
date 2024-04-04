@@ -38,7 +38,7 @@ func main() {
 
 	flag.Parse()
 
-	world, parameters := makeSimpleQuadsScene()
+	world, parameters := makeCornellBoxScene()
 
 	var mainHittable hittable
 

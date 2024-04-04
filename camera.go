@@ -12,6 +12,8 @@ type cameraParameters struct {
 
 	defocusAngle float64
 	focusDist    float64
+
+	backgroundColor vec3
 }
 
 type qualityParameters struct {
@@ -29,6 +31,8 @@ type camera struct {
 	imageWidth  int
 	imageHeight int
 	aspectRatio float64
+
+	backgroundColor vec3
 
 	center      vec3 // camera center
 	pixel00Loc  vec3 // location of pixel (0, 0)
@@ -92,6 +96,8 @@ func makeCamera(parameters cameraParameters, q *qualityParameters) *camera {
 		imageHeight: imageHeight,
 		aspectRatio: aspectRatio,
 
+		backgroundColor: parameters.backgroundColor,
+
 		center:      center,
 		pixel00Loc:  pixel00Loc,
 		pixelDeltaU: pixelDeltaU,
@@ -134,26 +140,40 @@ func (c *camera) pixelSampleSquare() vec3 {
 	return c.pixelDeltaU.multiplyScalar(px).add(c.pixelDeltaV.multiplyScalar(py))
 }
 
-func rayColor(r ray, depth int, world hittable) vec3 {
+func (c *camera) rayColor(r ray, depth int, world hittable) vec3 {
 	var rec hitRecord
 
 	if depth <= 0 {
 		return makeVec3(0, 0, 0)
 	}
 
-	if world.hit(r, makeInterval(0.001, infinity), &rec) {
-
-		absorbed, scattered, attenuation := rec.mat.scatter(&r, &rec)
-
-		if absorbed {
-			return makeVec3(0, 0, 0)
-		}
-
-		return attenuation.multiply(rayColor(*scattered, depth-1, world))
+	if !world.hit(r, makeInterval(0.001, infinity), &rec) {
+		return c.backgroundColor
 	}
 
-	unitDirection := r.direction.unitVector()
-	a := 0.5 * (unitDirection.y() + 1.0)
+	colorFromEmission := rec.mat.emitted(rec.u, rec.v, rec.p)
 
-	return white.multiplyScalar(1.0 - a).add(blue.multiplyScalar(a))
+	absorbed, scattered, attenuation := rec.mat.scatter(&r, &rec)
+
+	// TODO: flip boolean ? idk ??
+	if absorbed {
+		return colorFromEmission
+	}
+
+	colorFromScatter := attenuation.multiply(c.rayColor(*scattered, depth-1, world))
+
+	return colorFromEmission.add(colorFromScatter)
+
+	// absorbed, scattered, attenuation := rec.mat.scatter(&r, &rec)
+
+	// if absorbed {
+	// 	return makeVec3(0, 0, 0)
+	// }
+
+	// return attenuation.multiply(rayColor(*scattered, depth-1, world))
+
+	// unitDirection := r.direction.unitVector()
+	// a := 0.5 * (unitDirection.y() + 1.0)
+
+	// return white.multiplyScalar(1.0 - a).add(blue.multiplyScalar(a))
 }

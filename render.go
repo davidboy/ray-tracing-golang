@@ -38,7 +38,7 @@ func (r *render) runWholeImage(samples int, finished chan bool) {
 				ray := r.c.getRay(x, y)
 
 				pixelIndex := getPixelIndex(x, y, r.c.imageWidth)
-				pixelColor := rayColor(ray, r.c.q.samples, r.w)
+				pixelColor := r.c.rayColor(ray, r.c.q.samples, r.w)
 
 				pixels[pixelIndex] = pixelColor
 			}
@@ -56,7 +56,7 @@ func (r *render) runSinglePixel(x, y, samples int) {
 	pixelIndex := getPixelIndex(x, y, r.c.imageWidth)
 
 	for i := 0; i < samples; i++ {
-		pixel.addMut(rayColor(r.c.getRay(x, y), r.c.q.samples, r.w))
+		pixel.addMut(r.c.rayColor(r.c.getRay(x, y), r.c.q.samples, r.w))
 	}
 
 	r.addSinglePixelSample(pixel, samples, pixelIndex)
