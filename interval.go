@@ -52,5 +52,9 @@ func (v *vec3) clampMut(i interval) *vec3 {
 	return v
 }
 
+func (i interval) addScalar(v float64) interval {
+	return makeInterval(i.min+v, i.max+v)
+}
+
 var empty = makeInterval(math.Inf(1), math.Inf(-1))
 var universe = makeInterval(math.Inf(-1), math.Inf(1))

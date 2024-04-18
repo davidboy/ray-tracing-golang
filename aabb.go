@@ -109,3 +109,11 @@ func (a aabb) hit(r ray, ray_t interval) bool {
 
 	return true
 }
+
+func (a aabb) add(b vec3) aabb {
+	return makeAABB(
+		a.x.addScalar(b.e[0]),
+		a.y.addScalar(b.e[1]),
+		a.z.addScalar(b.e[2]),
+	)
+}

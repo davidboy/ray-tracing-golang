@@ -17,11 +17,11 @@ const USE_BHV = true
 var quality = qualityParameters{
 
 	// TODO: move to render parameters?
-	imageWidth:  400,          //  150 * 21 / 9, // 640,
-	imageHeight: 400 / 16 * 9, // 150,          // 480,
+	imageWidth:  512,
+	imageHeight: 512,
 
-	samples:  256 * 2 * 2 * 2 * 2,
-	maxDepth: 50,
+	samples:  512,
+	maxDepth: 10,
 	dof:      false,
 
 	// TODO: support locked time / no motion blur

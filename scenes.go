@@ -294,8 +294,17 @@ func makeCornellBoxScene() (*hittableList, cameraParameters) {
 	world.add(makeQuad(makeVec3(555, 555, 555), makeVec3(-555, 0, 0), makeVec3(0, 0, -555), white))
 	world.add(makeQuad(makeVec3(0, 0, 555), makeVec3(555, 0, 0), makeVec3(0, 555, 0), white))
 
-	world.add(makeBox(makeVec3(130, 0, 65), makeVec3(295, 165, 230), white))
-	world.add(makeBox(makeVec3(265, 0, 295), makeVec3(430, 330, 460), white))
+	var box1 hittable
+	box1 = makeBox(makeVec3(0, 0, 0), makeVec3(165, 330, 165), white)
+	box1 = makeRotateY(box1, 15)
+	box1 = makeTranslate(box1, makeVec3(265, 0, 295))
+	world.add(box1)
+
+	var box2 hittable
+	box2 = makeBox(makeVec3(0, 0, 0), makeVec3(165, 165, 165), white)
+	box2 = makeRotateY(box2, -18)
+	box2 = makeTranslate(box2, makeVec3(130, 0, 65))
+	world.add(box2)
 
 	parameters := cameraParameters{
 		vFov:     40,
