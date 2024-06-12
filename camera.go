@@ -114,11 +114,11 @@ var white = makeVec3(1.0, 1.0, 1.0)
 var blue = makeVec3(0.5, 0.7, 1.0)
 
 func (c *camera) getRay(x, y int) ray {
-	pixelCenter := c.pixel00Loc.
-		add(c.pixelDeltaU.multiplyScalar(float64(x))).
-		add(c.pixelDeltaV.multiplyScalar(float64(y)))
+	offset := pixelSampleSquare()
 
-	pixelSample := pixelCenter.add(c.pixelSampleSquare())
+	pixelCenter := c.pixel00Loc.
+		add(c.pixelDeltaU.multiplyScalar(float64(x) + offset.e[0])).
+		add(c.pixelDeltaV.multiplyScalar(float64(y) + offset.e[1]))
 
 	var rayOrigin vec3
 	if c.defocusAngle <= 0 {
@@ -128,16 +128,16 @@ func (c *camera) getRay(x, y int) ray {
 		rayOrigin = c.center.add(c.defocusDiskU.multiplyScalar(p.x())).add(c.defocusDiskV.multiplyScalar(p.y()))
 	}
 
-	rayDirection := pixelSample.subtract(rayOrigin)
+	rayDirection := pixelCenter.subtract(rayOrigin)
 	rayTime := rand()
 
 	return makeTimedRay(rayOrigin, rayDirection, rayTime)
 }
 
-func (c *camera) pixelSampleSquare() vec3 {
+func pixelSampleSquare() vec3 {
 	px := -0.5 + rand()
 	py := -0.5 + rand()
-	return c.pixelDeltaU.multiplyScalar(px).add(c.pixelDeltaV.multiplyScalar(py))
+	return makeVec3(px, py, 0)
 }
 
 func (c *camera) rayColor(r ray, depth int, world hittable) vec3 {
